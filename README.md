@@ -15,10 +15,10 @@ English is the default. Switch to Polish at any time; your choice is remembered 
 ## Atlas photographs
 
 1. Open **Atlas photographs** and add your own PDF.
-2. Choose a class from the syllabus, a region and a system.
-3. Draw a photograph and identify the pinned structure by typing a Polish, English or Latin name.
-4. Reveal the answer, recognition cues and anatomical relationships.
-5. Use **Show in 3D** to inspect the corresponding bone or nerve in spatial context.
+2. Choose **Whole McMinn · printed numbers** and a PDF page range, or **Prepared pins · explanations + 3D** and syllabus filters.
+3. Draw a photograph and type the name of the requested printed number or pinned structure.
+4. In whole-book mode, reveal the original caption and self-grade. Prepared pins check the name and reveal bilingual recognition and relationship notes.
+5. Prepared pins also offer **Show in 3D** for the corresponding bone or nerve.
 
 **Whole McMinn · printed numbers** adds **6,784 numbered-caption questions on 317 PDF pages**. Select a page range, identify a printed number, type an answer and reveal the original source caption. The page commentary becomes visible too, with a full-size reading view. Grade yourself against your own PDF. All 362 pages can be opened for reading.
 
