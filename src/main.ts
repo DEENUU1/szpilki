@@ -94,9 +94,9 @@ function get<T extends HTMLElement>(selector: string, type: { new (): T }): T {
 }
 const root = get("#app", HTMLDivElement);
 root.innerHTML = `
-<header class="app-header"><a class="brand" href="#atlas" aria-label="Szpilki, atlas anatomii"><svg width="30" height="34" viewBox="0 0 36 40" aria-hidden="true"><circle cx="24" cy="11" r="8" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="m19 18-14 18m5-7-2-6m2 6 6 1" stroke="currentColor" stroke-width="2.5" fill="none"/></svg><span>szpilki<span class="brand-dot">.</span></span></a><span class="header-caption">Twoja pracownia anatomii</span><nav class="main-tabs" aria-label="Tryb aplikacji"><button data-view="atlas" class="active"><i data-lucide="box"></i>Atlas 3D</button><button data-view="photos"><i data-lucide="scan-line"></i>Preparaty z atlasu</button><button data-view="progress"><i data-lucide="chart-no-axes-column"></i>Moja nauka</button></nav><label class="language-control"><span class="sr-only">Language / Język</span><select id="language" aria-label="Language / Język"><option value="en">EN</option><option value="pl">PL</option></select></label><button class="icon-button" id="help" aria-label="Pomoc i źródła"><i data-lucide="circle-help"></i></button></header>
+<header class="app-header"><a class="brand" href="#atlas" aria-label="Szpilki, atlas anatomii"><svg width="30" height="34" viewBox="0 0 36 40" aria-hidden="true"><circle cx="24" cy="11" r="8" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="m19 18-14 18m5-7-2-6m2 6 6 1" stroke="currentColor" stroke-width="2.5" fill="none"/></svg><span>szpilki<span class="brand-dot">.</span></span></a><nav class="main-tabs" aria-label="Tryb aplikacji"><button data-view="atlas" class="active"><i data-lucide="box"></i>Atlas 3D</button><button data-view="photos"><i data-lucide="scan-line"></i>Preparaty z atlasu</button><button data-view="progress"><i data-lucide="chart-no-axes-column"></i>Moja nauka</button></nav><label class="language-control"><span class="sr-only">Language / Język</span><select id="language" aria-label="Language / Język"><option value="en">EN</option><option value="pl">PL</option></select></label><button class="icon-button" id="help" aria-label="Pomoc i źródła"><i data-lucide="circle-help"></i></button></header>
 <div id="atlas-view" class="atlas-layout"><aside class="sidebar"><button class="close-sidebar" id="close-controls" aria-label="Zamknij zakres i warstwy">×</button><div class="sidebar-heading"><h2>Atlas anatomii</h2><span class="muted">Odkrywaj. Odsłaniaj. Zapamiętuj.</span></div>
-<div class="sidebar-section"><label for="sex">Model anatomiczny</label><div class="sex-control"><button data-sex="male" class="active">Mężczyzna</button><button data-sex="female">Kobieta</button></div><select id="sex" hidden aria-label="Model anatomiczny"><option value="male">Mężczyzna</option><option value="female">Kobieta</option></select><p id="coverage-note" class="fineprint">Model całego ciała · Z-Anatomy</p></div>
+<div class="sidebar-section"><p id="coverage-note" class="fineprint">Model całego ciała · Z-Anatomy</p></div>
 <div class="sidebar-section"><label for="region">Zakres nauki</label><select id="region">${Object.entries(
   regionNames,
 )
@@ -115,7 +115,7 @@ root.innerHTML = `
 <aside class="study-panel"><div class="study-tabs"><button id="explore-tab" class="active">Odkrywaj</button><button id="quiz-tab">Ćwicz szpilki</button></div><section id="explore-panel"><div class="detail-empty" id="detail-empty"><svg viewBox="0 0 90 100" width="70" aria-hidden="true"><path d="M49 15c-9 0-13 7-13 13s4 9 4 13l-15 9-6 23m21-32 14 1 17 18-5 13M40 44l-3 27-7 23m23-49 3 25 7 24M25 50l-8 3M56 47l14-3" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="53" cy="26" r="13" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><h2>Każda struktura<br> ma swoje miejsce.</h2><p>Kliknij model lub wybierz strukturę z listy. Odsłoń otoczenie i sprawdź, co znajduje się pod spodem.</p></div><div id="structure-detail" hidden></div><div class="study-callout"><i data-lucide="pin"></i><h3>Jak na szpilkach</h3><p>Wybierz zakres. Wylosuj strukturę. Rozpoznaj ją po położeniu — bez podpisów.</p><button id="start-quiz" class="primary">Rozpocznij ćwiczenie <i data-lucide="arrow-right"></i></button></div><div class="scope-note"><span>Twój najbliższy zakres</span><strong>Od kości po sploty nerwowe</strong><p>Kościec osiowy i kończyn, artrologia, mięśnie tułowia i kończyn, nerwy rdzeniowe i sploty.</p></div></section>
 <section id="quiz-panel" hidden><div class="quiz-heading"><span class="status-tag">Trening praktyczny</span><h2>Rozpoznaj strukturę</h2><p class="muted">Końcówka szpilki wskazuje powierzchnię struktury.</p></div><fieldset class="quiz-systems"><legend>Losuj z układów</legend>${(["skeletal", "muscular", "articular", "nervous"] satisfies System[]).map((s) => `<label><input type="checkbox" data-quiz-system="${s}" checked> ${systemNames[s]}</label>`).join("")}</fieldset><label class="checkbox-row"><input type="checkbox" id="only-mistakes"> Tylko moje błędy</label><label class="checkbox-row"><input type="checkbox" id="timed"> Limit 30 sekund</label><div class="quiz-score"><span>W tej sesji <strong id="session-score">0 / 0</strong></span><span id="quiz-timer"></span></div><div id="question-area" hidden><p id="question-number" class="question-number">Szpilka 01</p><h3>Co wskazuje szpilka?</h3><form id="answer-form"><label for="answer">Nazwa polska, łacińska lub angielska</label><input id="answer" placeholder="Wpisz nazwę struktury" autocomplete="off" spellcheck="false"><button type="submit" id="check-answer">Sprawdź</button></form><button id="reveal-answer" class="text-button">Pokaż odpowiedź</button><div id="answer-result" aria-live="polite"></div><div id="self-grade" class="button-row" hidden><button id="grade-wrong">Do powtórki</button><button id="grade-correct">Umiem</button></div></div><button id="random-pin" class="primary wide"><i data-lucide="shuffle"></i> Losuj szpilkę</button><button id="end-session" class="text-button">Zakończ sesję</button><p id="quiz-pool-note" class="fineprint"></p><p class="fineprint">Zasłaniające siatki są odsuwane z drogi szpilki. Nie podświetlamy odpowiedzi. Możesz obracać model.</p></section></aside></div></main></div>
 <section id="photos-view" class="other-view" hidden></section><section id="progress-view" class="other-view" hidden></section>
-<dialog id="help-dialog"><div class="dialog-header"><h2>Pracownia anatomii</h2><button id="close-help" aria-label="Zamknij">×</button></div><div class="help-content"><p>Model obracasz myszą lub palcem. Kółko myszy przybliża, prawy przycisk przesuwa. Na telefonie użyj dwóch palców do przesunięcia i przybliżenia. Lista struktur zapewnia wybór również bez trafiania w siatkę.</p><h3>Źródła modeli</h3><p>Model męski: <a href="https://www.z-anatomy.com/" target="_blank" rel="noreferrer">Z-Anatomy</a>, pochodzący z BodyParts3D / DBCLS, CC BY-SA 4.0. Model kobiecy: <a href="https://humanatlas.io/3d-reference-library" target="_blank" rel="noreferrer">Human Reference Atlas / NIH, Visible Human Female</a>, CC BY 4.0. Konwersja siatek i metadane: Anatria3D. <a href="./anatomy/NOTICE" target="_blank">Pełne autorstwo i opis zmian</a> · <a href="./anatomy/LICENSE" target="_blank">Licencje</a>.</p><h3>Rzeczywisty zakres</h3><p>Atlas zawiera elementy dostępne w tych zbiorach, w tym drobne nerwy i więzadła. Model kobiecy obejmuje głównie tułów i miednicę; nie ma w nim pełnych kończyn, mięśni ani nerwów. Przełączenie płci zmienia zbiór anatomiczny.</p><p>Nie wszystkie guzki, bruzdy, otwory i powierzchnie na kościach są osobnymi strukturami 3D. Nazwy źródłowe to łacina i angielski; wybrane struktury mają polskie tłumaczenia. Lista i karta mówią wprost, gdy polskiej nazwy nie ma.</p><h3>Twoja nauka</h3><p>Postępy, ustawienia atlasu i sesje zapisują się w localStorage tej przeglądarki. Możesz odświeżyć stronę i kontynuować pytanie. „Moja nauka” umożliwia eksport oraz import pliku JSON. Wyczyszczenie danych przeglądarki usuwa zapis. Nierozpoznany synonim możesz ocenić ręcznie po odsłonięciu odpowiedzi.</p><p>To pomoc do nauki anatomii. Nazewnictwo warto sprawdzić z prowadzącym zajęcia.</p></div></dialog>
+<dialog id="help-dialog"><div class="dialog-header"><h2>Pracownia anatomii</h2><button id="close-help" aria-label="Zamknij">×</button></div><div class="help-content"><p>Model obracasz myszą lub palcem. Kółko myszy przybliża, prawy przycisk przesuwa. Na telefonie użyj dwóch palców do przesunięcia i przybliżenia. Lista struktur zapewnia wybór również bez trafiania w siatkę.</p><h3>Źródła modeli</h3><p>Model: <a href="https://www.z-anatomy.com/" target="_blank" rel="noreferrer">Z-Anatomy</a>, pochodzący z BodyParts3D / DBCLS, CC BY-SA 4.0. Konwersja siatek i metadane: Anatria3D. <a href="./anatomy/NOTICE" target="_blank">Pełne autorstwo i opis zmian</a> · <a href="./anatomy/LICENSE" target="_blank">Licencje</a>.</p><h3>Rzeczywisty zakres</h3><p>Atlas Z-Anatomy zawiera model męski całego ciała, w tym drobne nerwy i więzadła.</p><p>Nie wszystkie guzki, bruzdy, otwory i powierzchnie na kościach są osobnymi strukturami 3D. Nazwy źródłowe to łacina i angielski; wybrane struktury mają polskie tłumaczenia. Lista i karta mówią wprost, gdy polskiej nazwy nie ma.</p><h3>Twoja nauka</h3><p>Postępy, ustawienia atlasu i sesje zapisują się w localStorage tej przeglądarki. Możesz odświeżyć stronę i kontynuować pytanie. „Moja nauka” umożliwia eksport oraz import pliku JSON. Wyczyszczenie danych przeglądarki usuwa zapis. Nierozpoznany synonim możesz ocenić ręcznie po odsłonięciu odpowiedzi.</p><p>To pomoc do nauki anatomii. Nazewnictwo warto sprawdzić z prowadzącym zajęcia.</p></div></dialog>
 <div class="toast" id="toast" role="status" hidden></div>`;
 createIcons({ icons, attrs: { "stroke-width": 1.65 } });
 
@@ -139,7 +139,7 @@ try {
     "Nie udało się odczytać postępów. Poprzedni zapis nie zostanie zastąpiony do pierwszej zmiany.",
   );
 }
-let sex: Sex = "male";
+const sex = "male";
 let region: Region = "exam";
 let manifest: Manifest;
 let viewer: AnatomyViewer | null = null;
@@ -270,7 +270,7 @@ function setStatus(text: string | null, error = false): void {
     status.innerHTML = `${error ? "" : '<span class="spinner"></span>'}<strong>${escapeHtml(text)}</strong>${error ? '<button id="retry-model">Spróbuj ponownie</button>' : "<span>Siatki pozostają dostępne lokalnie po pobraniu.</span>"}`;
     if (error)
       get("#retry-model", HTMLButtonElement).onclick = () => {
-        void switchSex(sex);
+        void loadAtlas();
       };
   }
 }
@@ -356,7 +356,7 @@ async function ensureVisible(): Promise<void> {
       get("#random-pin", HTMLButtonElement).disabled = false;
   }
 }
-async function switchSex(next: Sex, restore = false): Promise<void> {
+async function loadAtlas(restore = false): Promise<void> {
   if (switching) return;
   switching = true;
   if (!restore && activeSession(study)?.source === "3d") {
@@ -367,27 +367,18 @@ async function switchSex(next: Sex, restore = false): Promise<void> {
   stopQuestion();
   viewer?.dispose();
   viewer = null;
-  sex = next;
   selection = null;
   detail(null);
   setStatus("Przygotowuję model…");
-  document.querySelectorAll<HTMLButtonElement>("[data-sex]").forEach((b) => {
-    b.classList.toggle("active", b.dataset.sex === sex);
-    b.disabled = true;
-  });
   get("#coverage-note", HTMLParagraphElement).textContent =
-    sex === "male"
-      ? "Model całego ciała · Z-Anatomy"
-      : "Tułów i miednica · HRA. Bez pełnych kończyn, mięśni i nerwów.";
+    "Model całego ciała · Z-Anatomy";
   get("#model-caption", HTMLSpanElement).textContent =
-    sex === "male"
-      ? "Z-Anatomy · model męski"
-      : "Human Reference Atlas · model kobiecy";
+    "Z-Anatomy · model męski";
   try {
     let nextManifest = manifests.get(sex);
     if (!nextManifest) {
       const response = await fetch(
-        `${import.meta.env.BASE_URL}anatomy/${sex === "male" ? "manifest.json" : "manifest_female.json"}`,
+        `${import.meta.env.BASE_URL}anatomy/manifest.json`,
       );
       if (!response.ok) throw new Error(`Manifest: HTTP ${response.status}`);
       const raw: unknown = await response.json();
@@ -400,19 +391,12 @@ async function switchSex(next: Sex, restore = false): Promise<void> {
       systems.map((s) => [
         s,
         {
-          visible:
-            sex === "male"
-              ? s === "skeletal" || s === "muscular"
-              : ["skeletal", "digestive", "renal", "reproductive"].includes(s),
+          visible: s === "skeletal" || s === "muscular",
           opacity: 1,
         },
       ]),
     );
-    if (sex === "female") {
-      region = "all";
-      get("#region", HTMLSelectElement).value = "all";
-      get("#layer-preset", HTMLSelectElement).value = "custom";
-    } else get("#layer-preset", HTMLSelectElement).value = "muscles";
+    get("#layer-preset", HTMLSelectElement).value = "muscles";
     get("#region-title", HTMLElement).textContent = regionNames[region];
     viewer = new AnatomyViewer(modelHost, pin, manifest);
     viewer.onSelect = (s, point) => {
@@ -465,9 +449,6 @@ async function switchSex(next: Sex, restore = false): Promise<void> {
     );
   } finally {
     switching = false;
-    document.querySelectorAll<HTMLButtonElement>("[data-sex]").forEach((b) => {
-      b.disabled = false;
-    });
   }
 }
 function renderList(): void {
@@ -541,7 +522,7 @@ function detail(s: Structure | null): void {
     panel.replaceChildren();
     return;
   }
-  panel.innerHTML = `<div class="structure-type"><span class="swatch" style="--swatch:${systemColors[s.organ.system]}"></span>${systemNames[s.organ.system]}</div><h2>${escapeHtml(displayName(s.organ))}</h2><p class="latin-name" lang="la">${escapeHtml(s.organ.ta2_latin)}</p><p class="english-name" lang="en">${escapeHtml(s.organ.name_en)}</p>${getLanguage() === "en" || polishName(s.organ) ? "" : '<p class="fineprint">Brak zweryfikowanego tłumaczenia PL — wyświetlamy nazwę źródłową.</p>'}<dl class="structure-meta"><dt>Okolica</dt><dd>${escapeHtml(regionNames[viewer?.regionOf(s) === "upper" ? "upper" : viewer?.regionOf(s) === "lower" ? "lower" : viewer?.regionOf(s) === "head" ? "head" : "trunk"])}</dd><dt>Położenie</dt><dd>${/_l$/.test(s.id) ? "Strona lewa" : /_r$/.test(s.id) ? "Strona prawa" : "Struktura nieparzysta / część zbioru"}</dd></dl><details class="hierarchy"><summary>Położenie w atlasie</summary><p>${s.organ.path.map(escapeHtml).join(" → ")}</p></details><div class="detail-actions"><button id="focus-structure"><i data-lucide="focus"></i> Przybliż</button><button id="isolate-structure"><i data-lucide="scan"></i> Wyizoluj</button><button id="hide-structure"><i data-lucide="eye-off"></i> Ukryj strukturę</button><button id="restore-detail"><i data-lucide="layers"></i> Pokaż otoczenie</button></div><p class="fineprint">${sex === "male" ? "Z-Anatomy / BodyParts3D · CC BY-SA 4.0" : "HRA / NIH · CC BY 4.0"}</p>`;
+  panel.innerHTML = `<div class="structure-type"><span class="swatch" style="--swatch:${systemColors[s.organ.system]}"></span>${systemNames[s.organ.system]}</div><h2>${escapeHtml(displayName(s.organ))}</h2><p class="latin-name" lang="la">${escapeHtml(s.organ.ta2_latin)}</p><p class="english-name" lang="en">${escapeHtml(s.organ.name_en)}</p>${getLanguage() === "en" || polishName(s.organ) ? "" : '<p class="fineprint">Brak zweryfikowanego tłumaczenia PL — wyświetlamy nazwę źródłową.</p>'}<dl class="structure-meta"><dt>Okolica</dt><dd>${escapeHtml(regionNames[viewer?.regionOf(s) === "upper" ? "upper" : viewer?.regionOf(s) === "lower" ? "lower" : viewer?.regionOf(s) === "head" ? "head" : "trunk"])}</dd><dt>Położenie</dt><dd>${/_l$/.test(s.id) ? "Strona lewa" : /_r$/.test(s.id) ? "Strona prawa" : "Struktura nieparzysta / część zbioru"}</dd></dl><details class="hierarchy"><summary>Położenie w atlasie</summary><p>${s.organ.path.map(escapeHtml).join(" → ")}</p></details><div class="detail-actions"><button id="focus-structure"><i data-lucide="focus"></i> Przybliż</button><button id="isolate-structure"><i data-lucide="scan"></i> Wyizoluj</button><button id="hide-structure"><i data-lucide="eye-off"></i> Ukryj strukturę</button><button id="restore-detail"><i data-lucide="layers"></i> Pokaż otoczenie</button></div><p class="fineprint">Z-Anatomy / BodyParts3D · CC BY-SA 4.0</p>`;
   createIcons({ icons, attrs: { "stroke-width": 1.65 } });
   get("#focus-structure", HTMLButtonElement).onclick = () =>
     viewer?.focus(s.id);
@@ -747,7 +728,7 @@ const photos = new PhotoPractice(
   async (photo) => {
     if (!photo.modelId) return;
     showView("atlas");
-    if (sex !== "male") await switchSex("male");
+    if (!viewer) await loadAtlas();
     modeQuiz(false);
     region = photo.region;
     get("#region", HTMLSelectElement).value = region;
@@ -858,13 +839,6 @@ async function importProgress(file: File): Promise<void> {
 document
   .querySelectorAll<HTMLButtonElement>("[data-view]")
   .forEach((b) => (b.onclick = () => showView(b.dataset.view ?? "atlas")));
-document.querySelectorAll<HTMLButtonElement>("[data-sex]").forEach(
-  (b) =>
-    (b.onclick = () => {
-      const value = b.dataset.sex;
-      if (value === "male" || value === "female") void switchSex(value);
-    }),
-);
 get("#region", HTMLSelectElement).onchange = () => {
   const selected = get("#region", HTMLSelectElement).value;
   const r = Object.keys(regionNames).find((r) => r === selected);
@@ -1027,7 +1001,7 @@ get("#open-controls", HTMLButtonElement).onclick = () =>
   get(".sidebar", HTMLElement).classList.toggle("open");
 get("#close-controls", HTMLButtonElement).onclick = () =>
   get(".sidebar", HTMLElement).classList.remove("open");
-void switchSex(study.preferences.sex, true);
+void loadAtlas(true);
 
 get("#language", HTMLSelectElement).value = getLanguage();
 get("#language", HTMLSelectElement).onchange = () => {

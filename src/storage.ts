@@ -78,11 +78,31 @@ export function emptyStudy(): StudyData {
 }
 export function parseStudy(raw: unknown): StudyData {
   const current = studySchema.safeParse(raw);
-  if (current.success) return current.data;
+  if (current.success) return prepareSupportedModel(current.data);
   const legacy = z
     .object({ version: z.literal(1), reviews: reviewsSchema })
     .parse(raw);
   return { ...emptyStudy(), reviews: legacy.reviews };
+}
+export function prepareSupportedModel(
+  data: StudyData,
+  now = Date.now(),
+): StudyData {
+  if (data.preferences.sex === "female") {
+    data.preferences = {
+      ...data.preferences,
+      sex: "male",
+      layers: [],
+      quizSystems: ["skeletal", "muscular", "articular", "nervous"],
+    };
+  }
+  const session = activeSession(data);
+  if (session?.source === "3d" && session.settings.sex === "female") {
+    session.endedAt = now;
+    session.updatedAt = now;
+    data.activeSessionId = null;
+  }
+  return data;
 }
 export function readStudy(): StudyData {
   const raw =

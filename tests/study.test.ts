@@ -124,7 +124,7 @@ describe("question selection and answers", () => {
   });
 });
 describe("language preferences", () => {
-  it("defaults to English and stores an explicit Polish selection", () => {
+  it("remembers an explicit selection of either interface language", () => {
     setLanguage("en");
     expect(getLanguage()).toBe("en");
     expect(translate("Moja nauka")).toBe("My learning");

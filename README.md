@@ -10,11 +10,11 @@ _Actual application screenshot. Anatomy geometry: Z-Anatomy / BodyParts3D (DBCLS
 
 Szpilki is a browser-based study tool for anatomy “pins” exams. Explore real anatomical meshes in 3D, or practise on photographs from your own atlas: draw a pin, type its name, and reveal an explanation of the landmarks, attachments or nerve relationships that help identify it.
 
-English is the default. Switch to Polish at any time; your choice is remembered on the device.
+Polish is the default. Switch to English at any time; your explicit choice is remembered on the device.
 
 ## Atlas photographs
 
-1. Open **Atlas photographs** and add your own PDF.
+1. Open **Atlas photographs**. Open the linked atlases in Drive, read Yokochi in the built-in preview, or add your own PDF for pin practice.
 2. Choose **Whole McMinn · printed numbers** and a PDF page range, or **Prepared pins · explanations + 3D** and syllabus filters.
 3. Draw a photograph and type the name of the requested printed number or pinned structure.
 4. In whole-book mode, reveal the original caption and self-grade. Prepared pins check the name and reveal bilingual recognition and relationship notes.
@@ -42,7 +42,7 @@ For bony landmarks, the 3D link opens the corresponding bone; it does not claim 
 
 The male atlas contains **3,478 dataset elements**, including 335 skeletal, 1,110 muscular, 353 articular and 525 nervous-system entries. These are mesh elements, not a count of distinct named human organs: some are paired, partial or attachment components. Separate muscle-attachment meshes are excluded from the ordinary muscle view and quiz pool.
 
-The female HRA dataset contains **264 elements** and mainly covers the torso and pelvis. It is a genuinely different dataset, without a complete female limb, muscle or nerve atlas. The app shows this coverage explicitly. Not every bony groove, tubercle or foramen is separately identified in the 3D data, and Polish 3D labels are currently a curated subset; source English and Latin names remain available.
+The incomplete female HRA viewer has been withdrawn from the interface. Earlier female-session records remain in study exports; an unfinished female 3D session is closed when restoring older data, and the viewer uses the male whole-body atlas. Legacy HRA assets and their attribution remain in the repository. Not every bony groove, tubercle or foramen is separately identified in the 3D data, and Polish 3D labels are currently a curated subset; source English and Latin names remain available.
 
 <img src="docs/images/mobile.jpg" alt="The responsive anatomy atlas on a mobile screen" width="300">
 
@@ -115,3 +115,7 @@ npm run assets:verify
 ```
 
 This is a study aid, not an exhaustive or professionally validated medical reference. Confirm the terminology and specimen interpretation expected by your anatomy instructor.
+
+## Linked atlas reading
+
+The atlas library links to the two user-supplied Google Drive PDFs. Yokochi opens in an in-app Drive preview on request, with an external-link fallback. Drive reports that the 110 MB McMinn file is too large to preview, so its card offers a Drive download/open link and local PDF import instead. Google controls preview availability and download access. PDF pin practice still uses a one-time local file import; the Drive preview is a reading surface, not the PDF.js quiz canvas. No Drive credentials or API keys are embedded in the site, and file-sharing permissions are unchanged.
