@@ -192,11 +192,6 @@ p {
 .brand-dot {
   color: var(--accent);
 }
-.header-caption {
-  font-size: 12px;
-  color: var(--muted);
-  padding-left: 7px;
-}
 .main-tabs {
   height: 100%;
   display: flex;
@@ -267,32 +262,6 @@ p {
 }
 .sidebar-section .fineprint {
   margin-top: 7px;
-}
-.sex-control {
-  display: flex;
-  gap: 0;
-  border: 1px solid var(--control);
-  border-radius: 6px;
-  overflow: hidden;
-}
-.sex-control button {
-  flex: 1;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  padding: 8px 6px;
-  font-size: 12px;
-  min-height: 36px;
-}
-.sex-control button + button {
-  border-inline-start: 1px solid var(--control);
-}
-.sex-control button.active {
-  background: white;
-}
-.sex-control button span {
-  font-size: 18px;
-  line-height: 1;
 }
 .section-title {
   display: flex;
@@ -1259,9 +1228,6 @@ a {
   }
 }
 @media (max-width: 1180px) {
-  .header-caption {
-    display: none;
-  }
   .app-header {
     gap: 14px;
   }
@@ -1864,9 +1830,6 @@ textarea {
   .app-header .main-tabs {
     gap: 16px;
   }
-  .header-caption {
-    display: none;
-  }
 }
 @media (max-width: 640px) {
   .photo-header {
@@ -1991,4 +1954,62 @@ textarea {
 }
 .photo-filters label[hidden] {
   display: none;
+}
+
+.atlas-library {
+  margin: 0 0 24px;
+}
+.atlas-library-heading h2 {
+  margin: 0 0 5px;
+  font-size: 17px;
+}
+.atlas-library-heading p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.atlas-library-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.atlas-library-cards article {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+}
+.atlas-library-cards h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+.atlas-library-cards p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.atlas-preview-dialog {
+  width: min(1200px, 96vw);
+  max-width: 96vw;
+  padding: 18px;
+}
+.atlas-preview-dialog iframe {
+  display: block;
+  width: 100%;
+  height: 72vh;
+  border: 0;
+  background: #f1f4f4;
+}
+@media (max-width: 640px) {
+  .atlas-library-cards {
+    grid-template-columns: 1fr;
+  }
+  .atlas-preview-dialog {
+    padding: 10px;
+  }
 }

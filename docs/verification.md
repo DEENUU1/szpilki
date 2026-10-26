@@ -1,3 +1,12 @@
+# Interface and atlas-library update — 2026-10-27
+
+- Polish is the first-visit default; an explicit saved English or Polish selection still wins.
+- The navbar caption and female-model controls are removed. The viewer loads only the male whole-body manifest.
+- Earlier female preferences migrate to the supported viewer. An unfinished female 3D session is closed with its original identity and reviews preserved; an active photo session remains active.
+- The two Drive files were identified through connected metadata. Sharing permissions were explicitly left unchanged at the user's request.
+- Browser checks: fresh-origin Polish UI; no female controls or navbar caption; Yokochi's embedded reader shows page 1 of 157. Drive reports that McMinn is too large to preview, so the app offers its open/download link and local-import workflow instead of a broken preview.
+- `npm test`: 25 passing tests. Strict TypeScript and the production build pass. Added coverage for supported-model migration, retained history, language fallback, and the exact linked files.
+
 # Whole-book update verification
 
 The whole-book geometry index covers all 362 source pages, with 6,784 eligible numbered-caption questions on 317 pages. The 39 authored points remain a separate practice mode. See [content boundaries and reproduction](mcminn-index.md).

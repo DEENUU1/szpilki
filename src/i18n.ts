@@ -1,7 +1,10 @@
 export type Language = "en" | "pl";
-let language: Language = "en";
+export function languageFromPreference(value: string | null): Language {
+  return value === "en" ? "en" : "pl";
+}
+let language: Language = "pl";
 try {
-  language = localStorage.getItem("szpilki-language") === "pl" ? "pl" : "en";
+  language = languageFromPreference(localStorage.getItem("szpilki-language"));
 } catch (error) {
   console.warn("Language preference is unavailable.", error);
 }
@@ -19,7 +22,6 @@ export function setLanguage(value: Language): void {
 }
 // The Polish source strings are stable message keys. Atlas nomenclature is handled separately.
 const english: Record<string, string> = {
-  "Twoja pracownia anatomii": "Your anatomy workspace",
   "Tryb aplikacji": "Application mode",
   "Atlas 3D": "3D atlas",
   "Preparaty z atlasu": "Atlas photographs",
@@ -219,15 +221,15 @@ Object.assign(english, {
     "Interactive anatomy model. Drag to rotate and scroll to zoom. You can also select structures from the list.",
   "Model obracasz myszą lub palcem. Kółko myszy przybliża, prawy przycisk przesuwa. Na telefonie użyj dwóch palców do przesunięcia i przybliżenia. Lista struktur zapewnia wybór również bez trafiania w siatkę.":
     "Rotate with the mouse or a finger. Scroll to zoom and right-drag to pan. On mobile, use two fingers to pan and zoom. The structure list also lets you select small structures without clicking their mesh.",
-  "Model męski:": "Male model:",
-  ", pochodzący z BodyParts3D / DBCLS, CC BY-SA 4.0. Model kobiecy:":
-    ", derived from BodyParts3D / DBCLS, CC BY-SA 4.0. Female model:",
+  "Model:": "Model:",
+  ", pochodzący z BodyParts3D / DBCLS, CC BY-SA 4.0. Konwersja siatek i metadane: Anatria3D.":
+    ", derived from BodyParts3D / DBCLS, CC BY-SA 4.0. Mesh conversion and metadata: Anatria3D.",
   ", CC BY 4.0. Konwersja siatek i metadane: Anatria3D.":
     ", CC BY 4.0. Mesh conversion and metadata: Anatria3D.",
   "Pełne autorstwo i opis zmian": "Full credits and modifications",
   Licencje: "Licences",
-  "Atlas zawiera elementy dostępne w tych zbiorach, w tym drobne nerwy i więzadła. Model kobiecy obejmuje głównie tułów i miednicę; nie ma w nim pełnych kończyn, mięśni ani nerwów. Przełączenie płci zmienia zbiór anatomiczny.":
-    "The atlas contains structures available in these datasets, including small nerves and ligaments. The female dataset mainly covers the torso and pelvis, without complete limbs, muscles or nerves. Switching sex changes the actual anatomical dataset.",
+  "Atlas Z-Anatomy zawiera model męski całego ciała, w tym drobne nerwy i więzadła.":
+    "The Z-Anatomy atlas includes a male whole-body model, including small nerves and ligaments.",
   "Nie wszystkie guzki, bruzdy, otwory i powierzchnie na kościach są osobnymi strukturami 3D. Nazwy źródłowe to łacina i angielski; wybrane struktury mają polskie tłumaczenia. Lista i karta mówią wprost, gdy polskiej nazwy nie ma.":
     "Not every tubercle, groove, foramen or bone surface is a separately labelled 3D structure. Source nomenclature is Latin and English, with Polish translations for selected structures. Missing Polish labels are identified explicitly.",
   "Postępy, ustawienia atlasu i sesje zapisują się w localStorage tej przeglądarki. Możesz odświeżyć stronę i kontynuować pytanie. „Moja nauka” umożliwia eksport oraz import pliku JSON. Wyczyszczenie danych przeglądarki usuwa zapis. Nierozpoznany synonim możesz ocenić ręcznie po odsłonięciu odpowiedzi.":
