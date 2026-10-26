@@ -1,0 +1,150 @@
+{
+  "repository": "https://github.com/Nurkan1/Anatria-3D",
+  "commit": "108f5c5ab963d22021fa2bd6a52f63f3dcb5b004",
+  "files": [
+    {
+      "name": "LICENSE",
+      "bytes": 2285,
+      "sha256": "c383ca7aa65f68f4ea3f4b6d60fb101d62435f819b3003411d84819fcd661202",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/LICENSE"
+    },
+    {
+      "name": "NOTICE",
+      "bytes": 8191,
+      "sha256": "3b2304a2feca5a8304991de8d684b42b3fb77c23a958fa2871fd60de076bfcb4",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/NOTICE"
+    },
+    {
+      "name": "manifest.json",
+      "bytes": 1293434,
+      "sha256": "628983219020d9b9b0f14dfbc394c29952cab974fd18871469f6776917755662",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/manifest.json"
+    },
+    {
+      "name": "manifest_female.json",
+      "bytes": 86522,
+      "sha256": "730244c2352ed6a5f31c5c7923ac451074015420ddb1baf243001b67aa3f73b2",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/manifest_female.json"
+    },
+    {
+      "name": "skeletal_male.glb",
+      "bytes": 2823900,
+      "sha256": "b49d71788bfa0b4a3188e2954d59728a699b08ec280e70df1c2a95e13d4b81f8",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/skeletal_male.glb"
+    },
+    {
+      "name": "articular_male.glb",
+      "bytes": 1541408,
+      "sha256": "894533f99658c1428dce59e5225f6b1099aaf4720b3cdd7b39ac76cfbb0aec98",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/articular_male.glb"
+    },
+    {
+      "name": "muscular_male.glb",
+      "bytes": 11972116,
+      "sha256": "53a004c7b8af38fcbb88d5d1a7ab9dc3f6db2f5bb52188d81c5ddbfb4fb30243",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/muscular_male.glb"
+    },
+    {
+      "name": "nervous_male.glb",
+      "bytes": 8535424,
+      "sha256": "e7a3a2de6c6f098152e3619dd75613531749235cfa9f687d971c8b334a08dcb8",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/nervous_male.glb"
+    },
+    {
+      "name": "cardiovascular_male.glb",
+      "bytes": 7217588,
+      "sha256": "05f373a294ab809b9a628bc1474a66028642997330fddc553a33d4ac6409b757",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/cardiovascular_male.glb"
+    },
+    {
+      "name": "digestive_male.glb",
+      "bytes": 929984,
+      "sha256": "0f6b1ddc17ba93c318910db111322d53a4779b677df1bb24d99dd60c21963a08",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/digestive_male.glb"
+    },
+    {
+      "name": "endocrine_male.glb",
+      "bytes": 39824,
+      "sha256": "44ffd5a7de6731bfd36a83e7806b02c05685cabbae902ef85abb6b1681ae9684",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/endocrine_male.glb"
+    },
+    {
+      "name": "lymphatic_male.glb",
+      "bytes": 509592,
+      "sha256": "b73830220fb9d67cbf9f30ebc448c88483c1b3bd1c014f49eb10aefa70dfbfbd",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/lymphatic_male.glb"
+    },
+    {
+      "name": "regional_male.glb",
+      "bytes": 765860,
+      "sha256": "ffb30c89330ad50dac4c352a252e1c1ddaf7c8547c6d726e833308cc082f8680",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/regional_male.glb"
+    },
+    {
+      "name": "renal_male.glb",
+      "bytes": 59040,
+      "sha256": "4a3f95dbf8519a069703817ec63f1e9374d3cb1f0827f7fa1e10cc84bf411db1",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/renal_male.glb"
+    },
+    {
+      "name": "reproductive_male.glb",
+      "bytes": 63600,
+      "sha256": "2402674f2d222589f24b4b32c0f13b85588b5adda5878b2e2c405677d6e1891c",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/reproductive_male.glb"
+    },
+    {
+      "name": "respiratory_male.glb",
+      "bytes": 585232,
+      "sha256": "afc1f18329b877c04d7f27ad4f09e6de0c3c143fcb2ae9ad7fdd4e2dc9261e76",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/respiratory_male.glb"
+    },
+    {
+      "name": "visceral_male.glb",
+      "bytes": 1700280,
+      "sha256": "5b336f2e8964345adcd69b7a31919f059248b11c0ada97851efda5af6a18ebcf",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/visceral_male.glb"
+    },
+    {
+      "name": "skeletal_female.glb",
+      "bytes": 1356072,
+      "sha256": "be7a2d4866a9fe96a6870ed4e70faafaff963c4c2954891ff73002575c1b9747",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/skeletal_female.glb"
+    },
+    {
+      "name": "cardiovascular_female.glb",
+      "bytes": 448900,
+      "sha256": "271dac2d304aca7ee9dd9a4d115010fb51d5cba2ddae5bf01748288803cec3eb",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/cardiovascular_female.glb"
+    },
+    {
+      "name": "digestive_female.glb",
+      "bytes": 476856,
+      "sha256": "88e0ab9481101fcf492a8573a54599159c5b700565ad5817726219660aad2800",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/digestive_female.glb"
+    },
+    {
+      "name": "integumentary_female.glb",
+      "bytes": 2183908,
+      "sha256": "f419dd4df08bb461422040f5e6ae39343108de68b94b32271a05967f0af1bb22",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/integumentary_female.glb"
+    },
+    {
+      "name": "lymphatic_female.glb",
+      "bytes": 42572,
+      "sha256": "fce4af6751324a1985c36970131d10cb78217173e253cd9ffdca4f9c6f389b3f",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/lymphatic_female.glb"
+    },
+    {
+      "name": "renal_female.glb",
+      "bytes": 617164,
+      "sha256": "8e233626a0316ffa2e4131fe1d997724ca0c95c7856d9cc8686f4c55050afb80",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/renal_female.glb"
+    },
+    {
+      "name": "reproductive_female.glb",
+      "bytes": 428960,
+      "sha256": "894d3319a995a7238978ec1f4044ec6a6b5b3176d43c2d5ec51a9d5df01f9d37",
+      "url": "https://raw.githubusercontent.com/Nurkan1/Anatria-3D/108f5c5ab963d22021fa2bd6a52f63f3dcb5b004/public/anatomy/reproductive_female.glb"
+    }
+  ]
+}
