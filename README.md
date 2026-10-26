@@ -20,6 +20,10 @@ English is the default. Switch to Polish at any time; your choice is remembered 
 4. Reveal the answer, recognition cues and anatomical relationships.
 5. Use **Show in 3D** to inspect the corresponding bone or nerve in spatial context.
 
+**Whole McMinn · printed numbers** adds **6,784 numbered-caption questions on 317 PDF pages**. Select a page range, identify a printed number, type an answer and reveal the original source caption. The page commentary becomes visible too, with a full-size reading view. Grade yourself against your own PDF. All 362 pages can be opened for reading.
+
+This mode uses automatically located captions, which have not all been individually reviewed. It does not automatically grade OCR text or invent medical explanations. Exclude unsuitable questions locally and restore them later. Source captions remain in Polish/Latin even with English UI. See [coverage, limitations and the offline extraction workflow](docs/mcminn-index.md).
+
 The included McMinn starter deck contains **39 manually positioned pins**: 15 scapular landmarks, 10 humeral landmarks, 11 proximal femoral landmarks and 3 arm nerves. Each has bilingual recognition notes, attachment or nerve-course explanations, a source-page reference and a link to a real 3D structure. It covers selected material from classes 2 and 7, rather than the entire syllabus.
 
 The deck is matched to an exact scan by SHA-256. Other editions, including a different McMinn scan, do not silently reuse its coordinates. You can add your own labelled points and bilingual explanations to other PDFs, including Yokochi. Those annotations join your practice pool and JSON export. Original textbook pages are **not distributed in this repository**.
@@ -81,7 +85,7 @@ npm run assets:verify
 npm run build
 ```
 
-The test suite covers session persistence and migration, answer handling, review selection, import merging, language preferences, model-node consistency and every starter photo point's bounds and 3D link. The asset verifier checks SHA-256 hashes for all vendored anatomy files.
+The test suite covers whole-book geometry, page-range selection, source identity, backward-compatible book-session persistence, session persistence and migration, answer handling, review selection, import merging, language preferences, model-node consistency and every starter photo point's bounds and 3D link. The asset verifier checks SHA-256 hashes for all vendored anatomy files.
 
 The app uses TypeScript, Three.js, PDF.js, Zod and Vite. It needs no backend, login, AI provider key or paid service. The build is a static `dist/` directory with relative asset paths, suitable for a GitHub Pages project site.
 
