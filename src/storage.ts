@@ -29,6 +29,9 @@ export const sessionSchema = z.object({
       system: z.enum([...systems, "all"]),
       exercise: z.number().int().min(0).max(8),
       onlyMistakes: z.boolean(),
+      mode: z.enum(["pins", "book"]).default("pins"),
+      firstPage: z.number().int().min(1).max(362).default(1),
+      lastPage: z.number().int().min(1).max(362).default(362),
     })
     .nullable()
     .default(null),
@@ -51,12 +54,14 @@ export const studySchema = z.object({
   activeSessionId: z.string().nullable(),
   preferences: preferencesSchema,
   photoPins: z.array(photoPinSchema).default([]),
+  excludedBookQuestions: z.array(z.string()).default([]),
 });
 export type StudyData = z.infer<typeof studySchema>;
 export function emptyStudy(): StudyData {
   return {
     version: 2,
     photoPins: [],
+    excludedBookQuestions: [],
     reviews: [],
     sessions: [],
     activeSessionId: null,
@@ -168,6 +173,12 @@ export function mergeStudy(current: StudyData, incoming: StudyData): StudyData {
   }
   return {
     ...current,
+    excludedBookQuestions: [
+      ...new Set([
+        ...current.excludedBookQuestions,
+        ...incoming.excludedBookQuestions,
+      ]),
+    ],
     photoPins: [
       ...new Map(
         [...current.photoPins, ...incoming.photoPins].map((pin) => [

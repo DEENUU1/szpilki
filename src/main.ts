@@ -3,6 +3,7 @@ import "@fontsource/ibm-plex-sans/latin-500.css";
 import "@fontsource/ibm-plex-sans/latin-600.css";
 import { PhotoPractice } from "./photos";
 import { photoName } from "./photo-data";
+import { bookReviewName, questionName } from "./atlas-book";
 import {
   getLanguage,
   setLanguage,
@@ -761,10 +762,16 @@ const photos = new PhotoPractice(
   },
 );
 function photoNameForReview(id: string): string {
+  const bookName = bookReviewName(id, getLanguage());
+  if (bookName) return bookName;
   const pin = photos.pins.find(
     (pin) => `photo:${pin.atlasId}:${pin.id}` === id,
   );
-  return pin ? photoName(pin, getLanguage()) : id;
+  return pin
+    ? "kind" in pin
+      ? questionName(pin, getLanguage())
+      : photoName(pin, getLanguage())
+    : id;
 }
 function renderProgress(): void {
   const reviews = study.reviews;

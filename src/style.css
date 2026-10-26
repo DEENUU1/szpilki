@@ -1943,3 +1943,52 @@ textarea {
 .photo-pin-dialog:focus-visible {
   outline: 2px solid var(--accent);
 }
+
+.book-range {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin: 0 0 18px;
+}
+.book-range[hidden] {
+  display: none;
+}
+.book-range label {
+  display: grid;
+  gap: 5px;
+  font-size: 13px;
+}
+.book-range input {
+  width: 90px;
+  padding: 8px;
+}
+.book-range p {
+  flex: 1 1 320px;
+  margin: 0;
+}
+#book-answer {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: white;
+  border: 1px solid var(--line, #ddd);
+}
+.book-source-dialog {
+  max-width: 96vw;
+  max-height: 94vh;
+  overflow: auto;
+  padding: 12px;
+}
+.book-source-dialog button {
+  position: sticky;
+  top: 0;
+  display: block;
+}
+.book-source-dialog img {
+  display: block;
+  max-width: none;
+}
+.photo-filters label[hidden] {
+  display: none;
+}

@@ -1,4 +1,12 @@
-# Release verification — 2026-10-26
+# Whole-book update verification
+
+The whole-book geometry index covers all 362 source pages, with 6,784 eligible numbered-caption questions on 317 pages. The 39 authored points remain a separate practice mode. See [content boundaries and reproduction](mcminn-index.md).
+
+`npm test`: 21 passing tests. `npm run assets:verify`: all 24 anatomy assets match. `npm run build`: strict TypeScript and static production build pass without a chunk-size warning. `swiftc -typecheck scripts/mcminn-ocr.swift`: passes. Automated checks cover unique question identities, normalized source geometry, caption containment, exact scan identity, page-range isolation, session migration and round-tripping an unfinished whole-book question. Original captions are revealed from the local PDF and assessed manually; no OCR transcription is automatically marked correct.
+
+Browser verification on the production build includes selecting a single-page range, drawing a mediastinum label, typing an answer, revealing the correct original caption and the source page, and inspecting the masked and revealed views. Also checked: full-size source dialog, Polish UI, refresh restoration of the typed answer and page range, explicit self-grading, and the resulting review in My learning.
+
+## Initial release verification — 2026-10-26
 
 The release was checked against the production Vite build, not only the development server.
 
