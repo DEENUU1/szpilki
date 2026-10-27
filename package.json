@@ -10,7 +10,8 @@
     "test": "vitest run",
     "assets:verify": "node scripts/anatomy-assets.mjs --verify",
     "assets:fetch": "node scripts/anatomy-assets.mjs",
-    "atlas:propose": "vite build --ssr scripts/atlas-propose.ts --outDir .research/pipeline-bin && node .research/pipeline-bin/atlas-propose.js"
+    "atlas:propose": "vite build --ssr scripts/atlas-propose.ts --outDir .research/pipeline-bin && node .research/pipeline-bin/atlas-propose.js",
+    "atlas:public-index": "vite build --ssr scripts/atlas-public-index.ts --outDir .research/public-index-bin && node .research/public-index-bin/atlas-public-index.js"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.2.0",

@@ -1,6 +1,6 @@
 # Offline atlas proposal pipeline
 
-This maintainer tool automates batch preparation, not anatomical approval. It reads the exact McMinn scan and cached OCR locally, refines numeric observations on overlapping image tiles, joins them to the existing caption index, proposes crops and produces an editable review page. It does not call an external model/API, change the public practice deck, or modify learner progress.
+This maintainer tool automates batch preparation, not anatomical approval. It reads the exact McMinn scan and cached OCR locally, refines numeric observations on overlapping image tiles, joins them to the existing caption index, proposes crops and produces an editable review page. It does not call an external model/API or modify learner progress. A separate sanitized export now makes proposals available in the public app; see [automatic practice](automatic-practice.md).
 
 A detected printed number is an **OCR anchor, not a pin tip**. An operator must click the tissue or leader-line endpoint and verify the source, crop, terminology, teaching content and model side before exporting a prepared question. No automatic conversion of all proposals into ready study material is claimed.
 
@@ -65,7 +65,7 @@ python3 -m http.server 4180 --bind 127.0.0.1 \
 
 Open `http://127.0.0.1:4180/`. To compare a first pass, run image evidence and proposals using the original cached OCR in another fresh directory. Reuse the generated inputs for browser/UI iterations; rerunning OCR is unnecessary.
 
-The output contains private `pages/*.jpg`, `report.json`, `glossary.json`, `benchmark.json` and the local review UI. Output roots must resolve inside `.research/`, including through symlinks. This directory is ignored by Git. Do not copy its atlas pixels or raw captions to `public/`, repository documentation images, or a Pages artifact.
+The output contains private `pages/*.jpg`, `report.json`, `glossary.json`, `benchmark.json` and the local review UI. Output roots must resolve inside `.research/`, including through symlinks. This directory is ignored by Git. Do not copy its atlas pixels, raw captions or full reports to `public/`, repository documentation images, or a Pages artifact.
 
 ## Review and export
 

@@ -73,9 +73,15 @@ The optional reasoning field is a learner's note for comparing recognition with 
 
 Whole-book questions now have automatically inferred bones, joints/ligaments, muscles, nerves and other/unclassified filters. These are source-caption heuristics, not expert-reviewed classifications. The authored deck contains 119 prepared pins; the larger mode still uses page-based numbered questions and original source captions, without newly authored anatomical explanations for every item.
 
+## Automatic photo practice
+
+The **Automatic pins · 9,928 proposals** mode makes the full batch available in the web app. Add the matching McMinn PDF once, choose a page range, anatomical category or detection filter, type an answer, reveal the original caption and rate recall 1–4. Ratings, exclusions and resumable sessions stay on the device. The 119 individually prepared questions remain in their own mode.
+
+Automatic rectangles locate printed numbers, not verified anatomical pin tips. Some detections are diagrams, text or conflicting OCR; multiple possible captions remain visible and missing captions are explicit. Use the detection filter or exclude unsuitable questions. Only existing authored notes are reused where a single source caption has an exact name match; most proposals do not yet have a reviewed explanation. The repository contains geometry and note references, without atlas scans or OCR prose. See [automatic practice](docs/automatic-practice.md).
+
 ## Offline preparation of further specimen questions
 
-The [batch proposal and review workflow](docs/atlas-automation.md) processes the local scan into numbered-marker proposals, a provisional Latin glossary and a local review page. It reuses exact name/model matches and reviewed teaching notes while requiring confirmation of actual tissue tips, crops and bilingual content before export. It does not automatically add unverified questions to the public deck. Atlas pixels and raw OCR outputs stay in ignored local files.
+The [batch proposal and review workflow](docs/atlas-automation.md) processes the local scan into numbered-marker proposals, a provisional Latin glossary and a local review page. It reuses exact name/model matches and reviewed teaching notes while requiring confirmation of actual tissue tips, crops and bilingual content before export. The reviewed export remains separate from the clearly labelled automatic-proposal mode. Atlas pixels and raw OCR outputs stay in ignored local files.
 
 ## Development
 
