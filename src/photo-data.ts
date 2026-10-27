@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { makeCuratedPins } from "./curated-pins";
 import { regions, systems } from "./domain";
 export const cropSchema = z.object({
   x: z.number().min(0).max(1),
@@ -13,6 +14,7 @@ export const photoPinSchema = z.object({
   x: z.number().min(0).max(1),
   y: z.number().min(0).max(1),
   crop: cropSchema,
+  masks: z.array(cropSchema).optional(),
   pl: z.string(),
   en: z.string(),
   latin: z.string(),
@@ -588,3 +590,6 @@ starterPins.push(
 export function photoName(pin: PhotoPin, language: "en" | "pl"): string {
   return language === "en" ? pin.en : pin.pl;
 }
+
+// Keep the original IDs stable so saved FSRS schedules survive deck expansion.
+starterPins.push(...makeCuratedPins(mcminnId));
