@@ -1,3 +1,4 @@
+import { autoReviewName } from "./auto-pins";
 import { reviewQueue, ratingSchema, intervalLabel } from "./repetition";
 import type { StudyRating } from "./repetition";
 import { ratingButtons } from "./review-ui";
@@ -778,6 +779,8 @@ const photos = new PhotoPractice(
   },
 );
 function photoNameForReview(id: string): string {
+  const autoName = autoReviewName(id, getLanguage());
+  if (autoName) return autoName;
   const bookName = bookReviewName(id, getLanguage());
   if (bookName) return bookName;
   const pin = photos.pins.find(

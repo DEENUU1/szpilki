@@ -126,6 +126,7 @@ describe("whole-book source questions", () => {
       graded: false,
       photoFilters: {
         mode: "book",
+        autoQuality: "all",
         earlyReview: false,
         bookCategory: "all",
         firstPage: 180,

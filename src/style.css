@@ -1930,7 +1930,8 @@ textarea {
   flex: 1 1 320px;
   margin: 0;
 }
-#book-answer {
+#book-answer,
+.photo-theory canvas {
   display: block;
   width: 100%;
   height: auto;
@@ -1952,7 +1953,8 @@ textarea {
   display: block;
   max-width: none;
 }
-.photo-filters label[hidden] {
+.photo-filters label[hidden],
+.book-range label[hidden] {
   display: none;
 }
 

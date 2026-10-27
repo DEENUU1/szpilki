@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { autoQualities } from "./auto-pins";
 import { bookCategories } from "./book-category";
 import { scheduleReview, scheduledCardSchema } from "./repetition";
 import type { StudyRating } from "./repetition";
@@ -34,7 +35,8 @@ export const sessionSchema = z.object({
       exercise: z.number().int().min(0).max(8),
       onlyMistakes: z.boolean(),
       earlyReview: z.boolean().default(false),
-      mode: z.enum(["pins", "book"]).default("pins"),
+      mode: z.enum(["pins", "book", "auto"]).default("pins"),
+      autoQuality: z.enum(autoQualities).default("all"),
       bookCategory: z.enum([...bookCategories, "all"]).default("all"),
       firstPage: z.number().int().min(1).max(362).default(1),
       lastPage: z.number().int().min(1).max(362).default(362),
