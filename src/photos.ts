@@ -728,15 +728,21 @@ export class PhotoPractice {
         for (const caption of automatic.captions)
           paintBox(caption.legend, true);
       }
-      context.strokeStyle = "#b13b31";
-      context.lineWidth = 3;
       const a = automatic.anchor;
-      context.strokeRect(
-        a.x * full.width - 4,
-        a.y * full.height - 4,
-        a.w * full.width + 8,
-        a.h * full.height + 8,
-      );
+      const padding = 28;
+      const outline = (colour: string, width: number): void => {
+        context.strokeStyle = colour;
+        context.lineWidth = width;
+        context.strokeRect(
+          a.x * full.width - padding,
+          a.y * full.height - padding,
+          a.w * full.width + padding * 2,
+          a.h * full.height + padding * 2,
+        );
+      };
+      // The source canvas is downscaled in the viewer; keep contrast on dark specimens.
+      outline("white", 22);
+      outline("#e22a22", 12);
     }
     if (printed && this.question && !this.annotate && !this.browsing) {
       if (this.revealed) {
