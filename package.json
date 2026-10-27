@@ -9,7 +9,8 @@
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
     "assets:verify": "node scripts/anatomy-assets.mjs --verify",
-    "assets:fetch": "node scripts/anatomy-assets.mjs"
+    "assets:fetch": "node scripts/anatomy-assets.mjs",
+    "atlas:propose": "vite build --ssr scripts/atlas-propose.ts --outDir .research/pipeline-bin && node .research/pipeline-bin/atlas-propose.js"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.2.0",

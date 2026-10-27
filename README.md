@@ -73,6 +73,10 @@ The optional reasoning field is a learner's note for comparing recognition with 
 
 Whole-book questions now have automatically inferred bones, joints/ligaments, muscles, nerves and other/unclassified filters. These are source-caption heuristics, not expert-reviewed classifications. The authored deck contains 119 prepared pins; the larger mode still uses page-based numbered questions and original source captions, without newly authored anatomical explanations for every item.
 
+## Offline preparation of further specimen questions
+
+The [batch proposal and review workflow](docs/atlas-automation.md) processes the local scan into numbered-marker proposals, a provisional Latin glossary and a local review page. It reuses exact name/model matches and reviewed teaching notes while requiring confirmation of actual tissue tips, crops and bilingual content before export. It does not automatically add unverified questions to the public deck. Atlas pixels and raw OCR outputs stay in ignored local files.
+
 ## Development
 
 Requires Node.js 22.12 or newer in the Node 22 series, or a supported newer version.
