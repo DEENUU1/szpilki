@@ -1,6 +1,7 @@
 /** Offline geometry index. Private OCR text and textbook pixels never enter the output. */
 import { readFile, writeFile } from "node:fs/promises";
 import { z } from "zod";
+import { captionCategory } from "../src/book-category.ts";
 
 const itemSchema = z.object({
   text: z.string(),
@@ -179,6 +180,9 @@ const pages = data.pages.map((page) => {
         .map((label) => ({
           id: `mcminn-book-${page.page}-${groupIndex}-${label.number}`,
           number: label.number,
+          category: captionCategory(
+            label.items.map((item) => item.text).join(" "),
+          ),
           answer: bounds(label.items, page, 2),
           legend: bounds(
             group.flatMap((l) => l.items),
