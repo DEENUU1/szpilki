@@ -234,7 +234,15 @@ function startTimer(deadline: number | null): void {
     remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
     get("#quiz-timer", HTMLSpanElement).textContent =
       `00:${String(remaining).padStart(2, "0")}`;
-    if (remaining <= 0) grade(1, "Czas minął.");
+    if (remaining <= 0) {
+      revealAnswer();
+      const note = document.createElement("p");
+      note.textContent =
+        getLanguage() === "pl"
+          ? "Czas minął. Porównaj odpowiedź i wybierz ocenę 1–4."
+          : "Time is up. Compare the answer and choose a rating from 1 to 4.";
+      get("#answer-result", HTMLDivElement).prepend(note);
+    }
   };
   timer = window.setInterval(tick, 250);
   tick();
@@ -691,7 +699,7 @@ function revealAnswer(): void {
     );
   persist();
 }
-function grade(rating: StudyRating, message = ""): void {
+function grade(rating: StudyRating): void {
   if (!question || graded) return;
   persist();
   const id = `${sex}:${question.id}`;
@@ -718,10 +726,9 @@ function grade(rating: StudyRating, message = ""): void {
   const status = document.createElement("p");
   status.className = rating === 1 ? "grade-wrong" : "grade-correct";
   status.textContent =
-    message ||
-    (getLanguage() === "pl"
+    getLanguage() === "pl"
       ? `Ocena ${rating}/4 · kolejna powtórka za ${intervalLabel(card?.due ?? Date.now(), Date.now(), "pl")}.`
-      : `Rating ${rating}/4 · next review in ${intervalLabel(card?.due ?? Date.now(), Date.now(), "en")}.`);
+      : `Rating ${rating}/4 · next review in ${intervalLabel(card?.due ?? Date.now(), Date.now(), "en")}.`;
   get("#answer-result", HTMLDivElement).prepend(status);
   updateScore();
 }
