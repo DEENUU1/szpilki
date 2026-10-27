@@ -9,7 +9,7 @@
 
 # Whole-book update verification
 
-The whole-book geometry index covers all 362 source pages, with 6,784 eligible numbered-caption questions on 317 pages. The 39 authored points remain a separate practice mode. See [content boundaries and reproduction](mcminn-index.md).
+The whole-book geometry index covers all 362 source pages, with 6,784 eligible numbered-caption questions on 317 pages. The 119 authored points remain a separate practice mode; see [expanded coverage and checks](curated-pins.md). See [content boundaries and reproduction](mcminn-index.md).
 
 `npm test`: 21 passing tests. `npm run assets:verify`: all 24 anatomy assets match. `npm run build`: strict TypeScript and static production build pass without a chunk-size warning. `swiftc -typecheck scripts/mcminn-ocr.swift`: passes. Automated checks cover unique question identities, normalized source geometry, caption containment, exact scan identity, page-range isolation, session migration and round-tripping an unfinished whole-book question. Original captions are revealed from the local PDF and assessed manually; no OCR transcription is automatically marked correct.
 
@@ -29,7 +29,7 @@ The app follows the Framed sheet direction, seed 1365409261: a pale frame, a whi
 
 ## Content boundaries
 
-The 39-photo starter set covers selected class 2 and class 7 structures. It does not cover every item in the supplied eight-class syllabus. Coordinates were checked against the exact source scan and all model links are validated against the male manifest. Recognition and relationship notes cite the specimen and attachment plates. They still benefit from review by an anatomy instructor.
+The initial 39-photo starter set covered selected class 2 and class 7 structures. The October 27 expansion brings the authored deck to 119 questions across selected material from classes 2–8; see [coverage](curated-pins.md). It does not cover every item in the supplied eight-class syllabus. Coordinates were checked against the exact source scan and all model links are validated against the male manifest. Recognition and relationship notes cite the specimen and attachment plates. They still benefit from review by an anatomy instructor.
 
 The female HRA model is a limited torso/pelvis dataset. The app does not relabel a male whole-body model as female. Polish anatomical nomenclature in 3D is a curated subset; source English and Latin remain available. The UI and all built-in photo explanations have English and Polish versions.
 

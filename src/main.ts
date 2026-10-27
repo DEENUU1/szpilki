@@ -767,10 +767,10 @@ const photos = new PhotoPractice(
     modeQuiz(false);
     region = photo.region;
     get("#region", HTMLSelectElement).value = region;
-    const system = photo.system === "nervous" ? "nervous" : "skeletal";
+    const system = photo.system;
     for (const [name, layer] of layers) {
       layer.visible = name === system || name === "skeletal";
-      layer.opacity = system === "nervous" && name === "skeletal" ? 0.22 : 1;
+      layer.opacity = system !== "skeletal" && name === "skeletal" ? 0.22 : 1;
     }
     layerControls();
     await ensureVisible();
