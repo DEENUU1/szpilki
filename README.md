@@ -55,11 +55,23 @@ _Mobile view of the same application. Anatomy: Z-Anatomy / BodyParts3D (DBCLS), 
 | Data                                             | Storage                                |
 | ------------------------------------------------ | -------------------------------------- |
 | Language selection                               | `localStorage`: `szpilki-language`     |
-| Answers, sessions, atlas settings, custom points | `localStorage`: `szpilki-study-v2`     |
+| Answers, sessions, atlas settings, custom points | `localStorage`: `szpilki-study-v3`     |
 | Last selected PDF                                | `localStorage`: `szpilki-atlas-choice` |
 | PDF files                                        | IndexedDB: `szpilki-atlas-files`       |
 
 PDFs are too large for `localStorage`; their bytes stay in IndexedDB. Nothing is uploaded. JSON exports contain learning data and references, not the PDF files. Browser data is scoped to the origin: localhost and the public GitHub Pages site have separate records. Clearing browser data removes the local copy.
+
+## Ratings and spaced reviews
+
+After checking or revealing an answer, choose **1 · Again**, **2 · Hard**, **3 · Good**, or **4 · Easy**. Checking a name does not record a failed review. A one-character typo can produce a suggestion, but the learner chooses the grade; related anatomical names and numeric levels are never automatically accepted as typos.
+
+Scheduling uses pinned [`ts-fsrs` 5.4.2](https://github.com/open-spaced-repetition/ts-fsrs), an implementation of the [FSRS algorithm supported by Anki](https://faqs.ankiweb.net/what-spaced-repetition-algorithm.html). Retention is 90%, with initial learning steps of 10 minutes and 1 hour and a 10-minute relearning step. All four buttons preview the actual due interval; Hard and Easy are adaptive rather than fixed to 30 minutes and one day. This app does not sync with Anki or train personalised FSRS weights.
+
+Within the selected scope, due cards come before new cards; cards scheduled for the future are held back. **Practise before due date** explicitly allows early review. Drawing or revealing a card does not change its schedule. **My learning** lists due dates. Review state, ratings, optional recognition reasoning and unfinished drafts are stored locally and included in JSON exports. Version 3 storage migrates earlier exports and uses a separate key, retaining the original v2 browser data.
+
+The optional reasoning field is a learner's note for comparing recognition with the available explanation. It is not automatically assessed by a medical model. A new card clears both fields; refreshing the same card restores its drafts.
+
+Whole-book questions now have automatically inferred bones, joints/ligaments, muscles, nerves and other/unclassified filters. These are source-caption heuristics, not expert-reviewed classifications. The authored deck remains 39 prepared pins; the larger mode still uses page-based numbered questions and original source captions, without newly authored anatomical explanations for every item.
 
 ## Development
 

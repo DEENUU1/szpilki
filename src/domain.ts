@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ratingSchema } from "./repetition";
 
 export const systems = [
   "skeletal",
@@ -123,6 +124,43 @@ export function answerMatches(
     value.length > 1 && accepted.some((item) => normalizeAnswer(item) === value)
   );
 }
+export function answerFeedback(
+  answer: string,
+  accepted: readonly string[],
+): "exact" | "typo" | "different" {
+  if (answerMatches(answer, accepted)) return "exact";
+  const value = normalizeAnswer(answer);
+  if (value.length < 5 || /[0-9]/.test(value)) return "different";
+  for (const candidate of accepted.map(normalizeAnswer)) {
+    if (
+      /[0-9]/.test(candidate) ||
+      Math.abs(candidate.length - value.length) > 1
+    )
+      continue;
+    // Suggest a single insertion, deletion, substitution or adjacent transposition; never auto-accept it.
+    let left = 0;
+    while (left < value.length && value[left] === candidate[left]) left++;
+    if (
+      value.length === candidate.length &&
+      (value.slice(left + 1) === candidate.slice(left + 1) ||
+        (value[left] === candidate[left + 1] &&
+          value[left + 1] === candidate[left] &&
+          value.slice(left + 2) === candidate.slice(left + 2)))
+    )
+      return "typo";
+    if (
+      value.length + 1 === candidate.length &&
+      value.slice(left) === candidate.slice(left + 1)
+    )
+      return "typo";
+    if (
+      candidate.length + 1 === value.length &&
+      value.slice(left + 1) === candidate.slice(left)
+    )
+      return "typo";
+  }
+  return "different";
+}
 export function shuffled<T>(
   items: readonly T[],
   random: () => number = Math.random,
@@ -145,6 +183,9 @@ export const reviewsSchema = z.array(
     correct: z.boolean(),
     at: z.number(),
     sessionId: z.string().optional(),
+    rating: ratingSchema.optional(),
+    dueAt: z.number().int().nonnegative().optional(),
+    reasoning: z.string().max(4000).optional(),
   }),
 );
 export type Review = z.infer<typeof reviewsSchema>[number];

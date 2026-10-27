@@ -22,6 +22,16 @@ export function setLanguage(value: Language): void {
 }
 // The Polish source strings are stable message keys. Atlas nomenclature is handled separately.
 const english: Record<string, string> = {
+  "Ćwicz też przed terminem": "Practise before due date",
+  "Dlaczego uważasz, że to ta struktura? (opcjonalnie)":
+    "Why do you think it is this structure? (optional)",
+  "Punkty orientacyjne, przebieg, przyczepy, sąsiednie struktury…":
+    "Landmarks, course, attachments, neighbouring structures…",
+  "Powtórki FSRS": "FSRS reviews",
+  "Do powtórki teraz": "Due now",
+  "Nowa fiszka otrzyma termin dopiero po wybraniu oceny 1–4.":
+    "A new card is scheduled only after a rating from 1 to 4 is selected.",
+
   "Tryb aplikacji": "Application mode",
   "Atlas 3D": "3D atlas",
   "Preparaty z atlasu": "Atlas photographs",

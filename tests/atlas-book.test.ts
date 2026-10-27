@@ -64,6 +64,7 @@ describe("whole-book source questions", () => {
       for (const label of page.labels) {
         expect(Object.keys(label).sort()).toEqual([
           "answer",
+          "category",
           "id",
           "legend",
           "number",
@@ -125,6 +126,8 @@ describe("whole-book source questions", () => {
       graded: false,
       photoFilters: {
         mode: "book",
+        earlyReview: false,
+        bookCategory: "all",
         firstPage: 180,
         lastPage: 220,
         region: "all",

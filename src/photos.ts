@@ -1,9 +1,16 @@
+import { bookCategories } from "./book-category";
+import type { BookCategory } from "./book-category";
+import { reviewQueue, ratingSchema, intervalLabel } from "./repetition";
+import type { StudyRating } from "./repetition";
+import { ratingButtons } from "./review-ui";
+import { saveQuestionDraft } from "./question-draft";
 import { atlasLibrary, atlasPreviewUrl } from "./atlas-library";
 import * as pdfjs from "pdfjs-dist";
 import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import {
-  answerMatches,
+  answerFeedback,
   escapeHtml,
+  latestMistakes,
   nextQuestion,
   regionNames,
   systemNames,
@@ -19,7 +26,7 @@ import type { AtlasFile } from "./atlas-storage";
 import {
   activeSession,
   endSession,
-  recordReview,
+  recordRatedReview,
   saveStudy,
   startSession,
 } from "./storage";
@@ -44,6 +51,7 @@ export class PhotoPractice {
   private doc: pdfjs.PDFDocumentProxy | null = null;
   private question: PhotoPin | BookQuestion | null = null;
   private mode: "pins" | "book" = "book";
+  private bookCategory: BookCategory | "all" = "all";
   private firstPage = 1;
   private lastPage = 362;
   private book: BookIndex | null = null;
@@ -55,6 +63,7 @@ export class PhotoPractice {
   private system: System | "all" = "all";
   private exercise = 0;
   private onlyMistakes = false;
+  private earlyReview = false;
   private annotate = false;
   private browsing = false;
   private drawSequence = 0;
@@ -100,8 +109,8 @@ export class PhotoPractice {
   <section class="atlas-library" aria-label="${msg("Atlas library", "Biblioteka atlasów")}"><div class="atlas-library-heading"><h2>${msg("Your atlases", "Twoje atlasy")}</h2><p>${msg("Read online. To practise pins, download the PDF from Drive and add it once using “Add atlas PDF”.", "Czytaj online. Aby ćwiczyć szpilki, pobierz PDF z Drive i dodaj go jednorazowo przyciskiem „Dodaj atlas PDF”.")}</p></div><div class="atlas-library-cards">${atlasLibrary.map((atlas) => `<article><div><h3>${atlas.title}</h3><p>${atlas.size} · PDF · ${atlas.id === "mcminn" ? msg("Whole-book numbered questions", "Pytania z numerami z całej książki") : msg("Reading and your own annotations", "Czytanie i własne oznaczenia")}</p></div><div class="button-row">${atlas.preview ? `<button data-atlas-preview="${atlas.id}">${msg("Read here", "Czytaj tutaj")}</button>` : `<button data-import-atlas>${msg("Add PDF for practice", "Dodaj PDF do ćwiczeń")}</button>`}<a class="text-button" href="${atlas.url}" target="_blank" rel="noopener noreferrer">${atlas.preview ? msg("Open in Drive", "Otwórz w Drive") : msg("Open / download", "Otwórz / pobierz")} ↗</a></div>${atlas.preview ? "" : `<p class="fineprint">${msg("Drive cannot preview this large file. Download it and add the PDF to read and practise locally.", "Drive nie wyświetla podglądu tak dużego pliku. Pobierz go i dodaj PDF, aby czytać i ćwiczyć lokalnie.")}</p>`}</article>`).join("")}</div></section>
   <dialog id="atlas-preview-dialog" class="atlas-preview-dialog"></dialog>
   <div class="photo-filters"><label>${msg("Practice mode", "Tryb nauki")}<select id="atlas-mode"><option value="book">${msg("Whole McMinn · printed numbers", "Cały McMinn · numery z atlasu")}</option><option value="pins">${msg("Prepared pins · explanations + 3D", "Gotowe szpilki · objaśnienia + 3D")}</option></select></label><label>${msg("Atlas", "Atlas")}<select id="atlas-file"><option value="">${msg("Choose a local PDF", "Wybierz lokalny PDF")}</option>${this.files.map((f) => `<option value="${f.id}" ${this.file?.id === f.id ? "selected" : ""}>${escapeHtml(f.name)}</option>`).join("")}</select></label><label>${msg("Class / syllabus", "Ćwiczenie / rozpiska")}<select id="atlas-exercise"><option value="0">${msg("All classes", "Wszystkie ćwiczenia")}</option><option value="1">1 · ${msg("Axial skeleton", "Kościec osiowy")}</option><option value="2">2 · ${msg("Limb bones and landmarks", "Kości kończyn i punkty kostne")}</option><option value="3">3 · ${msg("Joints", "Stawy")}</option><option value="4">4 · ${msg("Trunk muscles", "Mięśnie tułowia")}</option><option value="5">5 · ${msg("Upper limb muscles", "Mięśnie kończyny górnej")}</option><option value="6">6 · ${msg("Lower limb muscles", "Mięśnie kończyny dolnej")}</option><option value="7">7 · ${msg("Brachial plexus and nerves", "Splot ramienny i nerwy")}</option><option value="8">8 · ${msg("Lumbar / sacral nerves", "Nerwy lędźwiowe i krzyżowe")}</option></select></label><label>${msg("Region", "Okolica")}<select id="atlas-region">${(["all", "upper", "lower", "trunk", "head"] satisfies Region[]).map((r) => `<option value="${r}">${escapeHtml(regionNames[r])}</option>`).join("")}</select></label><label>${msg("System", "Układ")}<select id="atlas-system"><option value="all">${msg("All systems", "Wszystkie układy")}</option>${(["skeletal", "muscular", "articular", "nervous"] satisfies System[]).map((s) => `<option value="${s}">${systemNames[s]}</option>`).join("")}</select></label></div>
-  <div id="book-range" class="book-range" ${this.mode === "book" ? "" : "hidden"}><label>${msg("PDF pages from", "Strony PDF od")}<input id="book-first" type="number" min="1" max="362" value="${this.firstPage}"></label><label>${msg("to", "do")}<input id="book-last" type="number" min="1" max="362" value="${this.lastPage}"></label><button id="book-apply">${msg("Apply range", "Zastosuj zakres")}</button><button id="book-reset" ${this.study().excludedBookQuestions.length ? "" : "hidden"}>${msg(`Restore excluded (${this.study().excludedBookQuestions.length})`, `Przywróć wykluczone (${this.study().excludedBookQuestions.length})`)}</button><p class="fineprint">${msg("Type the name for the printed number. The outlined legend identifies the relevant figure. Reveal the original answer and page commentary, then assess yourself. OCR locates labels; it does not grade your answer.", "Wpisz nazwę dla numeru z atlasu. Obrys legendy wskazuje właściwą rycinę. Odkryj oryginalny podpis i komentarz strony, potem oceń odpowiedź. OCR lokalizuje podpisy; nie ocenia odpowiedzi.")}</p></div><div class="photo-layout"><section class="photo-stage"><div id="atlas-empty" ${this.doc ? "hidden" : ""}><svg width="64" viewBox="0 0 80 90" aria-hidden="true"><path d="M10 3h40l20 20v63H10zM50 3v22h20M25 43h30M25 55h30M25 67h18" fill="none" stroke="currentColor" stroke-width="2"/></svg><h2>${msg("Practise on real atlas photographs", "Ćwicz na prawdziwych zdjęciach z atlasu")}</h2><p>${msg("Add your McMinn PDF to practise numbered structures throughout the book, or use the 39 prepared pins with original explanations and 3D links. The exact source scan is required.", "Dodaj przesłany PDF McMinna, aby ćwiczyć numerowane struktury w całej książce, albo wybierz 39 gotowych szpilek z objaśnieniami i połączeniem z 3D. Wymagany jest ten sam skan.")}</p><p class="fineprint">${msg("The PDF stays in this browser. It is never uploaded. The public app contains points and explanations, not the book scans.", "PDF pozostaje w tej przeglądarce i nie jest wysyłany. Publiczna aplikacja zawiera punkty i objaśnienia, bez skanów książek.")}</p></div><div class="photo-canvas-wrap" id="atlas-image" ${this.doc ? "" : "hidden"}><canvas id="atlas-canvas"></canvas><div id="photo-pin" class="photo-pin" hidden><span>1</span><b></b></div></div><p id="atlas-status" role="status" class="fineprint"></p><div class="photo-page-controls" ${this.doc ? "" : "hidden"}><button id="atlas-enlarge" disabled>${msg("Enlarge photograph", "Powiększ zdjęcie")}</button><button id="atlas-annotate">${msg("Add my own pin", "Dodaj własną szpilkę")}</button><label>${msg("PDF page", "Strona PDF")}<input id="atlas-page" type="number" min="1" value="${this.page}" max="${this.doc?.numPages ?? 1}"></label><button id="atlas-open-page">${msg("Open page", "Otwórz stronę")}</button></div></section>
-  <aside class="photo-question-panel"><span class="status-tag">${msg("Photo recognition", "Rozpoznawanie preparatów")}</span><h2>${this.question && "kind" in this.question ? msg(`Identify number ${this.question.number}`, `Rozpoznaj numer ${this.question.number}`) : msg("What does the pin indicate?", "Co wskazuje szpilka?")}</h2><p id="photo-pool" class="fineprint"></p><label class="checkbox-row"><input id="photo-mistakes" type="checkbox">${msg("Only my mistakes", "Tylko moje błędy")}</label><div id="photo-answer-area" ${this.question ? "" : "hidden"}><form id="photo-answer-form"><label for="photo-answer">${msg("Polish, Latin or English name", "Nazwa polska, łacińska lub angielska")}</label><input id="photo-answer" autocomplete="off" spellcheck="false" placeholder="${msg("Type the structure name", "Wpisz nazwę struktury")}"><button id="photo-check" type="submit">${this.mode === "book" ? msg("Reveal and compare", "Odkryj i porównaj") : msg("Check answer", "Sprawdź")}</button></form><button id="photo-reveal" class="text-button">${msg("Reveal answer", "Pokaż odpowiedź")}</button><div id="photo-feedback" aria-live="polite"></div><div class="button-row" id="photo-self-grade" hidden><button id="photo-wrong">${msg("Review again", "Do powtórki")}</button><button id="photo-correct">${msg("I knew it", "Umiem")}</button></div></div><button id="photo-draw" class="primary wide">${msg(this.question ? "Next photograph →" : "Draw a photograph", this.question ? "Następne zdjęcie →" : "Losuj zdjęcie")}</button><button id="photo-finish" class="text-button">${msg("Finish session", "Zakończ sesję")}</button><p class="fineprint">${msg("Whole-book questions use the original Polish/Latin source captions and manual grading. Prepared pins include bilingual explanations. Automatically located labels have not been individually reviewed.", "Pytania z całej książki korzystają z oryginalnych polskich i łacińskich podpisów oraz samooceny. Gotowe szpilki mają dwujęzyczne objaśnienia. Automatycznie zlokalizowane podpisy nie przeszły indywidualnej weryfikacji.")}</p></aside></div>
+  <div id="book-range" class="book-range" ${this.mode === "book" ? "" : "hidden"}><label>${msg("Category (automatic)", "Kategoria (automatyczna)")}<select id="book-category"><option value="all">${msg("All categories", "Wszystkie kategorie")}</option>${bookCategories.map((category) => `<option value="${category}">${category === "other" ? msg("Other / unclassified", "Pozostałe / nierozpoznane") : systemNames[category]}</option>`).join("")}</select></label><label>${msg("PDF pages from", "Strony PDF od")}<input id="book-first" type="number" min="1" max="362" value="${this.firstPage}"></label><label>${msg("to", "do")}<input id="book-last" type="number" min="1" max="362" value="${this.lastPage}"></label><button id="book-apply">${msg("Apply range", "Zastosuj zakres")}</button><button id="book-reset" ${this.study().excludedBookQuestions.length ? "" : "hidden"}>${msg(`Restore excluded (${this.study().excludedBookQuestions.length})`, `Przywróć wykluczone (${this.study().excludedBookQuestions.length})`)}</button><p class="fineprint">${msg("Type the name for the printed number. The outlined legend identifies the relevant figure. Reveal the original answer and page commentary, then assess yourself. OCR locates labels; it does not grade your answer.", "Wpisz nazwę dla numeru z atlasu. Obrys legendy wskazuje właściwą rycinę. Odkryj oryginalny podpis i komentarz strony, potem oceń odpowiedź. OCR lokalizuje podpisy; nie ocenia odpowiedzi.")}</p></div><div class="photo-layout"><section class="photo-stage"><div id="atlas-empty" ${this.doc ? "hidden" : ""}><svg width="64" viewBox="0 0 80 90" aria-hidden="true"><path d="M10 3h40l20 20v63H10zM50 3v22h20M25 43h30M25 55h30M25 67h18" fill="none" stroke="currentColor" stroke-width="2"/></svg><h2>${msg("Practise on real atlas photographs", "Ćwicz na prawdziwych zdjęciach z atlasu")}</h2><p>${msg("Add your McMinn PDF to practise numbered structures throughout the book, or use the 39 prepared pins with original explanations and 3D links. The exact source scan is required.", "Dodaj przesłany PDF McMinna, aby ćwiczyć numerowane struktury w całej książce, albo wybierz 39 gotowych szpilek z objaśnieniami i połączeniem z 3D. Wymagany jest ten sam skan.")}</p><p class="fineprint">${msg("The PDF stays in this browser. It is never uploaded. The public app contains points and explanations, not the book scans.", "PDF pozostaje w tej przeglądarce i nie jest wysyłany. Publiczna aplikacja zawiera punkty i objaśnienia, bez skanów książek.")}</p></div><div class="photo-canvas-wrap" id="atlas-image" ${this.doc ? "" : "hidden"}><canvas id="atlas-canvas"></canvas><div id="photo-pin" class="photo-pin" hidden><span>1</span><b></b></div></div><p id="atlas-status" role="status" class="fineprint"></p><div class="photo-page-controls" ${this.doc ? "" : "hidden"}><button id="atlas-enlarge" disabled>${msg("Enlarge photograph", "Powiększ zdjęcie")}</button><button id="atlas-annotate">${msg("Add my own pin", "Dodaj własną szpilkę")}</button><label>${msg("PDF page", "Strona PDF")}<input id="atlas-page" type="number" min="1" value="${this.page}" max="${this.doc?.numPages ?? 1}"></label><button id="atlas-open-page">${msg("Open page", "Otwórz stronę")}</button></div></section>
+  <aside class="photo-question-panel"><span class="status-tag">${msg("Photo recognition", "Rozpoznawanie preparatów")}</span><h2>${this.question && "kind" in this.question ? msg(`Identify number ${this.question.number}`, `Rozpoznaj numer ${this.question.number}`) : msg("What does the pin indicate?", "Co wskazuje szpilka?")}</h2><p id="photo-pool" class="fineprint"></p><label class="checkbox-row"><input id="photo-early" type="checkbox">${msg("Practise before due date", "Ćwicz też przed terminem")}</label><label class="checkbox-row"><input id="photo-mistakes" type="checkbox">${msg("Only my mistakes", "Tylko moje błędy")}</label><div id="photo-answer-area" ${this.question ? "" : "hidden"}><form id="photo-answer-form"><label for="photo-answer">${msg("Polish, Latin or English name", "Nazwa polska, łacińska lub angielska")}</label><input id="photo-answer" data-question-id="${this.question?.id ?? ""}" autocomplete="off" spellcheck="false" placeholder="${msg("Type the structure name", "Wpisz nazwę struktury")}"><button id="photo-check" type="submit">${this.mode === "book" ? msg("Reveal and compare", "Odkryj i porównaj") : msg("Check answer", "Sprawdź")}</button><label for="photo-reasoning">${msg("Why do you think it is this structure? (optional)", "Dlaczego uważasz, że to ta struktura? (opcjonalnie)")}</label><textarea id="photo-reasoning" maxlength="4000" rows="3" placeholder="${msg("Landmarks, course, attachments, neighbouring structures…", "Punkty orientacyjne, przebieg, przyczepy, sąsiednie struktury…")}"></textarea></form><button id="photo-reveal" class="text-button">${msg("Reveal answer", "Pokaż odpowiedź")}</button><div id="photo-feedback" aria-live="polite"></div><div class="button-row" id="photo-self-grade" hidden></div></div><button id="photo-draw" class="primary wide">${msg(this.question ? "Next photograph →" : "Draw a photograph", this.question ? "Następne zdjęcie →" : "Losuj zdjęcie")}</button><button id="photo-finish" class="text-button">${msg("Finish session", "Zakończ sesję")}</button><p class="fineprint">${msg("Whole-book questions use the original Polish/Latin source captions and manual grading. Prepared pins include bilingual explanations. Automatically located labels have not been individually reviewed.", "Pytania z całej książki korzystają z oryginalnych polskich i łacińskich podpisów oraz samooceny. Gotowe szpilki mają dwujęzyczne objaśnienia. Automatycznie zlokalizowane podpisy nie przeszły indywidualnej weryfikacji.")}</p></aside></div>
   <dialog id="photo-pin-dialog"><form id="photo-pin-form"><h2>${msg("New photo pin", "Nowa szpilka fotograficzna")}</h2><label>English<input id="custom-en" required maxlength="180"></label><label>Polski<input id="custom-pl" required maxlength="180"></label><label>Latin<input id="custom-latin" required maxlength="180"></label><label>${msg("How to recognise it (English)", "Jak rozpoznać (po angielsku)")}<textarea id="custom-recognize-en" required maxlength="1600"></textarea></label><label>${msg("How to recognise it (Polish)", "Jak rozpoznać (po polsku)")}<textarea id="custom-recognize-pl" required maxlength="1600"></textarea></label><label>${msg("Connections / theory (English)", "Powiązania / teoria (po angielsku)")}<textarea id="custom-theory-en" required maxlength="2400"></textarea></label><label>${msg("Connections / theory (Polish)", "Powiązania / teoria (po polsku)")}<textarea id="custom-theory-pl" required maxlength="2400"></textarea></label><p class="fineprint">${msg("The current region, system and class filters are used for this pin. Set a specific class and system before adding one.", "Szpilka otrzyma aktualną okolicę, układ i ćwiczenie z filtrów. Przed dodaniem wybierz konkretne ćwiczenie i układ.")}</p><div class="button-row"><button id="custom-cancel" type="button">${msg("Cancel", "Anuluj")}</button><button type="submit" class="primary">${msg("Save pin", "Zapisz szpilkę")}</button></div></form></dialog>`;
     this.root
       .querySelectorAll<HTMLButtonElement>("[data-import-atlas]")
@@ -115,6 +124,13 @@ export class PhotoPractice {
         button.onclick = () =>
           this.openPreview(button.dataset.atlasPreview ?? "");
       });
+    this.node("#book-category", HTMLSelectElement).value = this.bookCategory;
+    this.node("#book-category", HTMLSelectElement).onchange = () => {
+      const value = this.node("#book-category", HTMLSelectElement).value;
+      const category = bookCategories.find((item) => item === value);
+      this.bookCategory = category ?? "all";
+      this.scopeChanged();
+    };
     this.node("#atlas-mode", HTMLSelectElement).value = this.mode;
     for (const selector of [
       "#atlas-exercise",
@@ -228,19 +244,37 @@ export class PhotoPractice {
         this.reveal();
         return;
       }
-      this.grade(
-        answerMatches(this.node("#photo-answer", HTMLInputElement).value, [
-          this.question.pl,
-          this.question.en,
-          this.question.latin,
-        ]),
+      const feedback = answerFeedback(
+        this.node("#photo-answer", HTMLInputElement).value,
+        [this.question.pl, this.question.en, this.question.latin],
       );
+      this.reveal();
+      const note = document.createElement("p");
+      note.textContent =
+        feedback === "exact"
+          ? msg(
+              "Name matches. Choose how well you remembered it.",
+              "Nazwa jest zgodna. Oceń, jak dobrze ją pamiętasz.",
+            )
+          : feedback === "typo"
+            ? msg(
+                "Possible typo. Compare the answer and choose a rating; no failure has been recorded.",
+                "Możliwa literówka. Porównaj odpowiedź i wybierz ocenę; nie zapisano błędu.",
+              )
+            : msg(
+                "Compare your answer with the explanation, then rate your recall.",
+                "Porównaj odpowiedź z objaśnieniem i oceń swoją znajomość.",
+              );
+      this.node("#photo-feedback", HTMLDivElement).prepend(note);
     };
     this.node("#photo-answer", HTMLInputElement).oninput = () => this.persist();
-    this.node("#photo-wrong", HTMLButtonElement).onclick = () =>
-      this.grade(false);
-    this.node("#photo-correct", HTMLButtonElement).onclick = () =>
-      this.grade(true);
+    this.node("#photo-reasoning", HTMLTextAreaElement).oninput = () =>
+      this.persist();
+    this.node("#photo-early", HTMLInputElement).checked = this.earlyReview;
+    this.node("#photo-early", HTMLInputElement).onchange = () => {
+      this.earlyReview = this.node("#photo-early", HTMLInputElement).checked;
+      this.scopeChanged();
+    };
     this.node("#photo-finish", HTMLButtonElement).onclick = () => {
       if (activeSession(this.study())?.source === "photo")
         endSession(this.study());
@@ -309,6 +343,8 @@ export class PhotoPractice {
     if (this.question) {
       const session = activeSession(this.study());
       this.node("#photo-answer", HTMLInputElement).value = session?.draft ?? "";
+      this.node("#photo-reasoning", HTMLTextAreaElement).value =
+        session?.reasoning ?? "";
       if (this.revealed) this.showExplanation();
     }
   }
@@ -336,14 +372,15 @@ export class PhotoPractice {
     this.graded = false;
     this.persist();
     this.render();
-    if (this.doc) void this.draw();
     if (this.doc) void this.draw().catch((error) => console.error(error));
   }
   private pool(): (PhotoPin | BookQuestion)[] {
     if (this.mode === "book")
       return this.file?.id === mcminnId && this.book
         ? bookPool(this.book, this.firstPage, this.lastPage).filter(
-            (q) => !this.study().excludedBookQuestions.includes(q.id),
+            (q) =>
+              !this.study().excludedBookQuestions.includes(q.id) &&
+              (this.bookCategory === "all" || q.category === this.bookCategory),
           )
         : [];
     return this.pins.filter(
@@ -369,6 +406,27 @@ export class PhotoPractice {
             `${count} checked pins in this atlas and scope.`,
             `${count} sprawdzonych szpilek w tym atlasie i zakresie.`,
           );
+    const mistakes = new Set(latestMistakes(this.study().reviews));
+    const candidates = pool.map((pin) => ({
+      id: `photo:${pin.atlasId}:${pin.id}`,
+    }));
+    const queue = reviewQueue(
+      this.onlyMistakes
+        ? candidates.filter((item) => mistakes.has(item.id))
+        : candidates,
+      this.study().schedules,
+      Date.now(),
+      this.earlyReview,
+    );
+    this.node("#photo-pool", HTMLParagraphElement).textContent += msg(
+      ` Due now: ${queue.due}; new: ${queue.fresh}.`,
+      ` Teraz do powtórki: ${queue.due}; nowych: ${queue.fresh}.`,
+    );
+    if (!queue.due && !queue.fresh && queue.nextDue !== null)
+      this.node("#photo-pool", HTMLParagraphElement).textContent += msg(
+        ` Next: ${new Date(queue.nextDue).toLocaleString("en-GB")}.`,
+        ` Najbliższa: ${new Date(queue.nextDue).toLocaleString("pl-PL")}.`,
+      );
     this.node("#photo-draw", HTMLButtonElement).disabled = !count || this.busy;
   }
   private async restoreFiles(): Promise<void> {
@@ -510,9 +568,11 @@ export class PhotoPractice {
             ? this.question.exercise
             : 0);
         this.onlyMistakes = session?.photoFilters?.onlyMistakes ?? false;
+        this.earlyReview = session?.photoFilters?.earlyReview ?? false;
         this.mode =
           session?.photoFilters?.mode ??
           (this.question && "kind" in this.question ? "book" : "pins");
+        this.bookCategory = session?.photoFilters?.bookCategory ?? "all";
         this.firstPage = session?.photoFilters?.firstPage ?? 1;
         this.lastPage = session?.photoFilters?.lastPage ?? 362;
       }
@@ -571,7 +631,7 @@ export class PhotoPractice {
           box.h * full.height,
         );
     };
-    if (printed && !this.annotate && !this.browsing) {
+    if (printed && this.question && !this.annotate && !this.browsing) {
       if (this.revealed) {
         const answer = this.root.querySelector("#book-answer");
         if (answer instanceof HTMLCanvasElement) {
@@ -641,25 +701,33 @@ export class PhotoPractice {
     }
     this.node("#atlas-image", HTMLDivElement).hidden = false;
     this.node("#atlas-empty", HTMLDivElement).hidden = true;
-    this.node("#atlas-status", HTMLParagraphElement).textContent = this.browsing
-      ? msg(
-          `Source PDF · page ${page} of ${this.doc.numPages}.`,
-          `Źródłowy PDF · strona ${page} z ${this.doc.numPages}.`,
-        )
-      : this.annotate
+    this.node("#atlas-page", HTMLInputElement).value = String(page);
+    this.page = page;
+    this.node("#atlas-status", HTMLParagraphElement).textContent =
+      !this.question && !this.annotate
         ? msg(
-            "Click the exact structure to add a pin.",
-            "Kliknij dokładnie w strukturę, aby dodać szpilkę.",
+            `PDF page ${page}. Draw a card to start practice.`,
+            `Strona PDF ${page}. Wylosuj fiszkę, aby rozpocząć ćwiczenie.`,
           )
-        : printed
+        : this.browsing
           ? msg(
-              `PDF page ${page} · find printed number ${printed.number} in the figure associated with the outlined legend. ${this.revealed ? "Original captions and commentary are visible." : "Captions are masked automatically; report any visible answer."}`,
-              `Strona PDF ${page} · znajdź numer ${printed.number} na rycinie odpowiadającej obrysowanej legendzie. ${this.revealed ? "Widoczne są oryginalne podpisy i komentarz." : "Podpisy ukryto automatycznie; zgłoś widoczną odpowiedź."}`,
+              `Source PDF · page ${page} of ${this.doc.numPages}.`,
+              `Źródłowy PDF · strona ${page} z ${this.doc.numPages}.`,
             )
-          : msg(
-              `Local PDF · ${this.doc.numPages} pages · the image has no answer labels.`,
-              `Lokalny PDF · ${this.doc.numPages} stron · obraz nie ma podpisów odpowiedzi.`,
-            );
+          : this.annotate
+            ? msg(
+                "Click the exact structure to add a pin.",
+                "Kliknij dokładnie w strukturę, aby dodać szpilkę.",
+              )
+            : printed
+              ? msg(
+                  `PDF page ${page} · find printed number ${printed.number} in the figure associated with the outlined legend. ${this.revealed ? "Original captions and commentary are visible." : "Captions are masked automatically; report any visible answer."}`,
+                  `Strona PDF ${page} · znajdź numer ${printed.number} na rycinie odpowiadającej obrysowanej legendzie. ${this.revealed ? "Widoczne są oryginalne podpisy i komentarz." : "Podpisy ukryto automatycznie; zgłoś widoczną odpowiedź."}`,
+                )
+              : msg(
+                  `Local PDF · ${this.doc.numPages} pages · the image has no answer labels.`,
+                  `Lokalny PDF · ${this.doc.numPages} stron · obraz nie ma podpisów odpowiedzi.`,
+                );
   }
   async restoreSession(): Promise<void> {
     const session = activeSession(this.study());
@@ -678,12 +746,34 @@ export class PhotoPractice {
     if (this.busy || !this.file) return;
     const data = this.study();
     const previous = this.question?.id ?? null;
+    const candidates = this.pool().map((pin) => ({
+      id: `photo:${pin.atlasId}:${pin.id}`,
+      pin,
+    }));
+    const mistakes = new Set(latestMistakes(data.reviews));
+    const queue = reviewQueue(
+      this.onlyMistakes
+        ? candidates.filter((c) => mistakes.has(c.id))
+        : candidates,
+      data.schedules,
+      Date.now(),
+      this.earlyReview,
+    );
     const pin = nextQuestion(
-      this.pool().map((pin) => ({ id: `photo:${pin.atlasId}:${pin.id}`, pin })),
+      queue.items,
       previous ? `photo:${this.file.id}:${previous}` : null,
       data.reviews,
       this.onlyMistakes,
     )?.pin;
+    if (!pin && queue.nextDue !== null) {
+      this.notify(
+        msg(
+          `No cards due now. Next review: ${new Date(queue.nextDue).toLocaleString("en-GB")}. Enable early practice if needed.`,
+          `Teraz nie ma kart do powtórki. Najbliższa: ${new Date(queue.nextDue).toLocaleString("pl-PL")}. Możesz włączyć ćwiczenie przed terminem.`,
+        ),
+      );
+      return;
+    }
     if (!pin) {
       this.notify(
         msg(
@@ -708,7 +798,9 @@ export class PhotoPractice {
       system: this.system,
       exercise: this.exercise,
       onlyMistakes: this.onlyMistakes,
+      earlyReview: this.earlyReview,
       mode: this.mode,
+      bookCategory: this.bookCategory,
       firstPage: this.firstPage,
       lastPage: this.lastPage,
     };
@@ -716,6 +808,7 @@ export class PhotoPractice {
     session.questionId = pin.id;
     session.questionCount++;
     session.draft = "";
+    session.reasoning = "";
     session.revealed = false;
     session.graded = false;
     session.deadline = null;
@@ -725,8 +818,8 @@ export class PhotoPractice {
     this.graded = false;
     this.annotate = false;
     this.browsing = false;
-    this.persist();
     this.render();
+    this.persist();
     this.busy = true;
     this.poolLabel();
     try {
@@ -766,12 +859,29 @@ export class PhotoPractice {
     if (!pin) return;
     const lang = getLanguage();
     this.node("#photo-answer", HTMLInputElement).disabled = true;
+    this.node("#photo-reasoning", HTMLTextAreaElement).disabled = true;
     this.node("#photo-check", HTMLButtonElement).disabled = true;
     this.node("#photo-reveal", HTMLButtonElement).hidden = true;
-    this.node("#photo-self-grade", HTMLDivElement).hidden = this.graded;
+    const ratingRoot = this.node("#photo-self-grade", HTMLDivElement);
+    ratingRoot.hidden = this.graded;
+    ratingRoot.innerHTML = ratingButtons(
+      this.study().schedules[`photo:${pin.atlasId}:${pin.id}`],
+      lang,
+    );
+    ratingRoot
+      .querySelectorAll<HTMLButtonElement>("[data-review-rating]")
+      .forEach(
+        (button) =>
+          (button.onclick = () => {
+            const rating = ratingSchema.parse(
+              Number(button.dataset.reviewRating),
+            );
+            this.grade(rating);
+          }),
+      );
     if ("kind" in pin) {
       this.node("#photo-feedback", HTMLDivElement).innerHTML =
-        `<div class="revealed-answer"><strong>${escapeHtml(questionName(pin, lang))}</strong><p>${msg("Your answer", "Twoja odpowiedź")}: ${escapeHtml(activeSession(this.study())?.draft ?? "")}</p></div><section class="photo-theory"><h3>${msg("Original source answer", "Oryginalna odpowiedź ze źródła")}</h3><canvas id="book-answer" aria-label="${msg("Original caption from your local PDF", "Oryginalny podpis z lokalnego PDF-a")}"></canvas><p>${msg("Compare your answer with the caption above, then choose “I knew it” or “Review again”. The full page now shows the source commentary and nearby structures. This mode uses the original Polish/Latin text; no automatic translation or generated anatomy is substituted.", "Porównaj odpowiedź z podpisem powyżej i wybierz „Umiem” albo „Do powtórki”. Pełna strona pokazuje teraz komentarz z atlasu i sąsiednie struktury. Ten tryb korzysta z oryginalnego tekstu polskiego i łacińskiego, bez automatycznego tłumaczenia ani generowanej anatomii.")}</p><button id="book-exclude">${msg("Wrong caption / exclude question", "Błędny podpis / wyklucz pytanie")}</button><button id="book-source-zoom" disabled>${msg("Enlarge source page", "Powiększ stronę źródłową")}</button><p class="fineprint">${msg("Automatically located caption. If the number or crop is wrong, skip the question without grading it.", "Podpis zlokalizowany automatycznie. Jeżeli numer lub wycinek jest błędny, pomiń pytanie bez oceniania.")}</p></section>`;
+        `<div class="revealed-answer"><strong>${escapeHtml(questionName(pin, lang))}</strong><p>${msg("Your answer", "Twoja odpowiedź")}: ${escapeHtml(activeSession(this.study())?.draft ?? "")}</p></div><section class="photo-theory"><h3>${msg("Original source answer", "Oryginalna odpowiedź ze źródła")}</h3><canvas id="book-answer" aria-label="${msg("Original caption from your local PDF", "Oryginalny podpis z lokalnego PDF-a")}"></canvas><p>${msg("Compare your answer with the caption above, then choose a rating from 1 to 4. The full page now shows the source commentary and nearby structures. This mode uses the original Polish/Latin text; no automatic translation or generated anatomy is substituted.", "Porównaj odpowiedź z podpisem powyżej i wybierz ocenę od 1 do 4. Pełna strona pokazuje teraz komentarz z atlasu i sąsiednie struktury. Ten tryb korzysta z oryginalnego tekstu polskiego i łacińskiego, bez automatycznego tłumaczenia ani generowanej anatomii.")}</p><button id="book-exclude">${msg("Wrong caption / exclude question", "Błędny podpis / wyklucz pytanie")}</button><button id="book-source-zoom" disabled>${msg("Enlarge source page", "Powiększ stronę źródłową")}</button><p class="fineprint">${msg("Automatically located caption. If the number or crop is wrong, skip the question without grading it.", "Podpis zlokalizowany automatycznie. Jeżeli numer lub wycinek jest błędny, pomiń pytanie bez oceniania.")}</p></section>`;
       this.node("#book-exclude", HTMLButtonElement).onclick = () => {
         const excluded = this.study().excludedBookQuestions;
         if (!excluded.includes(pin.id)) excluded.push(pin.id);
@@ -780,6 +890,7 @@ export class PhotoPractice {
         if (session?.source === "photo") {
           session.questionId = null;
           session.draft = "";
+          session.reasoning = "";
           session.revealed = false;
           session.graded = false;
         }
@@ -823,58 +934,37 @@ export class PhotoPractice {
     this.root.append(dialog);
     dialog.showModal();
   }
-  private grade(correct: boolean): void {
+  private grade(rating: StudyRating): void {
     if (!this.question || this.graded) return;
-    this.graded = true;
     const data = this.study();
     const session = activeSession(data);
     if (!session || session.source !== "photo") return;
-    let review;
+    const id = `photo:${this.question.atlasId}:${this.question.id}`;
+    this.persist();
     try {
-      review = recordReview(
-        data,
-        `photo:${this.question.atlasId}:${this.question.id}`,
-        correct,
-        session.id,
-      );
+      recordRatedReview(data, id, rating, session.id, session.reasoning);
     } catch (error) {
       console.error(error);
-      review = data.reviews.at(-1);
       this.notify(
         msg(
-          "Could not save progress. Export your data.",
-          "Nie udało się zapisać postępów. Wyeksportuj dane.",
+          "Could not save the review. Export your data.",
+          "Nie udało się zapisać oceny. Spróbuj ponownie lub wyeksportuj dane.",
         ),
       );
+      return;
     }
-    if (!review) return;
-    const savedReview = review;
+    this.graded = true;
     this.reveal();
-    const status = document.createElement("p");
-    status.className = correct ? "grade-correct" : "grade-wrong";
-    status.textContent = msg(
-      correct ? "Correct answer." : "Review this structure again.",
-      correct ? "Dobra odpowiedź." : "Wróć do tej struktury w powtórce.",
-    );
-    this.node("#photo-feedback", HTMLDivElement).prepend(status);
-    if (!correct) {
-      const accept = document.createElement("button");
-      accept.className = "text-button";
-      accept.textContent = msg(
-        "Accept my synonym as correct",
-        "Uznaj mój synonim za poprawny",
+    this.poolLabel();
+    const card = data.schedules[id];
+    if (card) {
+      const status = document.createElement("p");
+      status.className = rating === 1 ? "grade-wrong" : "grade-correct";
+      status.textContent = msg(
+        `Rating ${rating}/4 · next review in ${intervalLabel(card.due, Date.now(), "en")}.`,
+        `Ocena ${rating}/4 · kolejna powtórka za ${intervalLabel(card.due, Date.now(), "pl")}.`,
       );
-      accept.onclick = () => {
-        savedReview.correct = true;
-        this.persist();
-        status.textContent = msg(
-          "Answer accepted manually.",
-          "Odpowiedź uznana ręcznie.",
-        );
-        status.className = "grade-correct";
-        accept.remove();
-      };
-      this.node("#photo-feedback", HTMLDivElement).append(accept);
+      this.node("#photo-feedback", HTMLDivElement).prepend(status);
     }
   }
   private persist(): void {
@@ -882,7 +972,13 @@ export class PhotoPractice {
     const session = activeSession(data);
     if (session?.source === "photo" && this.question) {
       session.questionId = this.question.id;
-      session.draft = this.node("#photo-answer", HTMLInputElement).value;
+      const input = this.node("#photo-answer", HTMLInputElement);
+      saveQuestionDraft(
+        session,
+        input.dataset.questionId,
+        input.value,
+        this.node("#photo-reasoning", HTMLTextAreaElement).value,
+      );
       session.revealed = this.revealed;
       session.graded = this.graded;
       session.updatedAt = Date.now();

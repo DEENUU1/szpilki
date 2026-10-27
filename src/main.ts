@@ -1,3 +1,7 @@
+import { reviewQueue, ratingSchema, intervalLabel } from "./repetition";
+import type { StudyRating } from "./repetition";
+import { ratingButtons } from "./review-ui";
+import { saveQuestionDraft } from "./question-draft";
 import "@fontsource/ibm-plex-sans/latin-400.css";
 import "@fontsource/ibm-plex-sans/latin-500.css";
 import "@fontsource/ibm-plex-sans/latin-600.css";
@@ -57,7 +61,7 @@ const icons = {
   Layers,
 };
 import {
-  answerMatches,
+  answerFeedback,
   escapeHtml,
   inRegion,
   latestMistakes,
@@ -68,12 +72,12 @@ import {
   systemNames,
   systems,
 } from "./domain";
-import type { Manifest, Region, Review, Sex, System } from "./domain";
+import type { Manifest, Region, Sex, System } from "./domain";
 import { acceptedNames, displayName, polishName } from "./names";
 import {
   exportStudy,
   readStudy,
-  recordReview,
+  recordRatedReview,
   saveStudy,
   emptyStudy,
   activeSession,
@@ -113,7 +117,7 @@ root.innerHTML = `
 <main class="work-sheet"><div class="viewer-header"><div><h1 class="canvas-title">Atlas anatomii</h1><button id="open-controls" class="mobile-controls"><i data-lucide="sliders-horizontal"></i> Zakres i warstwy</button><span class="breadcrumb">Pracownia <span>/</span> <strong id="region-title">Kolokwium · od szyi w dół</strong></span></div><div class="viewer-header-right"><span id="visible-count" class="muted">Ładowanie modelu…</span><button id="fullscreen" class="icon-button" aria-label="Pełny ekran modelu"><i data-lucide="maximize"></i></button></div></div>
 <div class="workspace"><section class="model-area" aria-label="Model 3D"><div class="model-canvas" id="model-host"><div id="pin" class="anatomy-pin" hidden><span>1</span><b></b></div><div class="canvas-heading"><span id="model-caption">Z-Anatomy · model męski</span><span class="view-label" id="view-label">Widok przedni</span></div><div id="viewer-status" class="viewer-status"><span class="spinner"></span><strong>Przygotowuję preparat…</strong><span>Wczytuję rzeczywiste siatki anatomiczne.</span></div><div id="hover-label" class="hover-label" hidden></div><div class="orientation"><span>S</span><span>L</span><span>P</span><span>I</span><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 4v32M4 20h32" stroke="currentColor" fill="none"/><circle cx="20" cy="20" r="3" fill="currentColor"/></svg></div><div class="zoom-controls"><button id="zoom-in" aria-label="Powiększ"><i data-lucide="plus"></i></button><button id="zoom-out" aria-label="Pomniejsz"><i data-lucide="minus"></i></button><button id="fit" aria-label="Dopasuj model"><i data-lucide="scan"></i></button></div><div class="view-controls" aria-label="Kierunek widoku"><button data-direction="front" class="active">Przód</button><button data-direction="back">Tył</button><button data-direction="left">Lewy bok</button><button data-direction="right">Prawy bok</button></div></div><footer class="canvas-footer"><span><i data-lucide="mouse-pointer-2"></i> Przeciągnij, aby obrócić · przewiń, aby zbliżyć</span><span>Geometria 3D · rzeczywiste struktury</span></footer></section>
 <aside class="study-panel"><div class="study-tabs"><button id="explore-tab" class="active">Odkrywaj</button><button id="quiz-tab">Ćwicz szpilki</button></div><section id="explore-panel"><div class="detail-empty" id="detail-empty"><svg viewBox="0 0 90 100" width="70" aria-hidden="true"><path d="M49 15c-9 0-13 7-13 13s4 9 4 13l-15 9-6 23m21-32 14 1 17 18-5 13M40 44l-3 27-7 23m23-49 3 25 7 24M25 50l-8 3M56 47l14-3" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="53" cy="26" r="13" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><h2>Każda struktura<br> ma swoje miejsce.</h2><p>Kliknij model lub wybierz strukturę z listy. Odsłoń otoczenie i sprawdź, co znajduje się pod spodem.</p></div><div id="structure-detail" hidden></div><div class="study-callout"><i data-lucide="pin"></i><h3>Jak na szpilkach</h3><p>Wybierz zakres. Wylosuj strukturę. Rozpoznaj ją po położeniu — bez podpisów.</p><button id="start-quiz" class="primary">Rozpocznij ćwiczenie <i data-lucide="arrow-right"></i></button></div><div class="scope-note"><span>Twój najbliższy zakres</span><strong>Od kości po sploty nerwowe</strong><p>Kościec osiowy i kończyn, artrologia, mięśnie tułowia i kończyn, nerwy rdzeniowe i sploty.</p></div></section>
-<section id="quiz-panel" hidden><div class="quiz-heading"><span class="status-tag">Trening praktyczny</span><h2>Rozpoznaj strukturę</h2><p class="muted">Końcówka szpilki wskazuje powierzchnię struktury.</p></div><fieldset class="quiz-systems"><legend>Losuj z układów</legend>${(["skeletal", "muscular", "articular", "nervous"] satisfies System[]).map((s) => `<label><input type="checkbox" data-quiz-system="${s}" checked> ${systemNames[s]}</label>`).join("")}</fieldset><label class="checkbox-row"><input type="checkbox" id="only-mistakes"> Tylko moje błędy</label><label class="checkbox-row"><input type="checkbox" id="timed"> Limit 30 sekund</label><div class="quiz-score"><span>W tej sesji <strong id="session-score">0 / 0</strong></span><span id="quiz-timer"></span></div><div id="question-area" hidden><p id="question-number" class="question-number">Szpilka 01</p><h3>Co wskazuje szpilka?</h3><form id="answer-form"><label for="answer">Nazwa polska, łacińska lub angielska</label><input id="answer" placeholder="Wpisz nazwę struktury" autocomplete="off" spellcheck="false"><button type="submit" id="check-answer">Sprawdź</button></form><button id="reveal-answer" class="text-button">Pokaż odpowiedź</button><div id="answer-result" aria-live="polite"></div><div id="self-grade" class="button-row" hidden><button id="grade-wrong">Do powtórki</button><button id="grade-correct">Umiem</button></div></div><button id="random-pin" class="primary wide"><i data-lucide="shuffle"></i> Losuj szpilkę</button><button id="end-session" class="text-button">Zakończ sesję</button><p id="quiz-pool-note" class="fineprint"></p><p class="fineprint">Zasłaniające siatki są odsuwane z drogi szpilki. Nie podświetlamy odpowiedzi. Możesz obracać model.</p></section></aside></div></main></div>
+<section id="quiz-panel" hidden><div class="quiz-heading"><span class="status-tag">Trening praktyczny</span><h2>Rozpoznaj strukturę</h2><p class="muted">Końcówka szpilki wskazuje powierzchnię struktury.</p></div><fieldset class="quiz-systems"><legend>Losuj z układów</legend>${(["skeletal", "muscular", "articular", "nervous"] satisfies System[]).map((s) => `<label><input type="checkbox" data-quiz-system="${s}" checked> ${systemNames[s]}</label>`).join("")}</fieldset><label class="checkbox-row"><input type="checkbox" id="early-review"> Ćwicz też przed terminem</label><label class="checkbox-row"><input type="checkbox" id="only-mistakes"> Tylko moje błędy</label><label class="checkbox-row"><input type="checkbox" id="timed"> Limit 30 sekund</label><div class="quiz-score"><span>W tej sesji <strong id="session-score">0 / 0</strong></span><span id="quiz-timer"></span></div><div id="question-area" hidden><p id="question-number" class="question-number">Szpilka 01</p><h3>Co wskazuje szpilka?</h3><form id="answer-form"><label for="answer">Nazwa polska, łacińska lub angielska</label><input id="answer" placeholder="Wpisz nazwę struktury" autocomplete="off" spellcheck="false"><button type="submit" id="check-answer">Sprawdź</button><label for="reasoning">Dlaczego uważasz, że to ta struktura? (opcjonalnie)</label><textarea id="reasoning" maxlength="4000" rows="3" placeholder="Punkty orientacyjne, przebieg, przyczepy, sąsiednie struktury…"></textarea></form><button id="reveal-answer" class="text-button">Pokaż odpowiedź</button><div id="answer-result" aria-live="polite"></div><div id="self-grade" class="button-row" hidden></div></div><button id="random-pin" class="primary wide"><i data-lucide="shuffle"></i> Losuj szpilkę</button><button id="end-session" class="text-button">Zakończ sesję</button><p id="quiz-pool-note" class="fineprint"></p><p class="fineprint">Zasłaniające siatki są odsuwane z drogi szpilki. Nie podświetlamy odpowiedzi. Możesz obracać model.</p></section></aside></div></main></div>
 <section id="photos-view" class="other-view" hidden></section><section id="progress-view" class="other-view" hidden></section>
 <dialog id="help-dialog"><div class="dialog-header"><h2>Pracownia anatomii</h2><button id="close-help" aria-label="Zamknij">×</button></div><div class="help-content"><p>Model obracasz myszą lub palcem. Kółko myszy przybliża, prawy przycisk przesuwa. Na telefonie użyj dwóch palców do przesunięcia i przybliżenia. Lista struktur zapewnia wybór również bez trafiania w siatkę.</p><h3>Źródła modeli</h3><p>Model: <a href="https://www.z-anatomy.com/" target="_blank" rel="noreferrer">Z-Anatomy</a>, pochodzący z BodyParts3D / DBCLS, CC BY-SA 4.0. Konwersja siatek i metadane: Anatria3D. <a href="./anatomy/NOTICE" target="_blank">Pełne autorstwo i opis zmian</a> · <a href="./anatomy/LICENSE" target="_blank">Licencje</a>.</p><h3>Rzeczywisty zakres</h3><p>Atlas Z-Anatomy zawiera model męski całego ciała, w tym drobne nerwy i więzadła.</p><p>Nie wszystkie guzki, bruzdy, otwory i powierzchnie na kościach są osobnymi strukturami 3D. Nazwy źródłowe to łacina i angielski; wybrane struktury mają polskie tłumaczenia. Lista i karta mówią wprost, gdy polskiej nazwy nie ma.</p><h3>Twoja nauka</h3><p>Postępy, ustawienia atlasu i sesje zapisują się w localStorage tej przeglądarki. Możesz odświeżyć stronę i kontynuować pytanie. „Moja nauka” umożliwia eksport oraz import pliku JSON. Wyczyszczenie danych przeglądarki usuwa zapis. Nierozpoznany synonim możesz ocenić ręcznie po odsłonięciu odpowiedzi.</p><p>To pomoc do nauki anatomii. Nazewnictwo warto sprawdzić z prowadzącym zajęcia.</p></div></dialog>
 <div class="toast" id="toast" role="status" hidden></div>`;
@@ -191,6 +195,7 @@ function capturePreferences(): Preferences {
     quizSystems,
     timed: get("#timed", HTMLInputElement).checked,
     onlyMistakes: get("#only-mistakes", HTMLInputElement).checked,
+    earlyReview: get("#early-review", HTMLInputElement).checked,
   };
 }
 function persist(): void {
@@ -202,7 +207,13 @@ function persist(): void {
     if (question) {
       session.questionId = question.id;
       session.questionCount = questionCount;
-      session.draft = get("#answer", HTMLInputElement).value;
+      const input = get("#answer", HTMLInputElement);
+      saveQuestionDraft(
+        session,
+        input.dataset.questionId,
+        input.value,
+        get("#reasoning", HTMLTextAreaElement).value,
+      );
       session.revealed = revealed;
       session.graded = graded;
     }
@@ -223,7 +234,7 @@ function startTimer(deadline: number | null): void {
     remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
     get("#quiz-timer", HTMLSpanElement).textContent =
       `00:${String(remaining).padStart(2, "0")}`;
-    if (remaining <= 0) grade(false, "Czas minął.");
+    if (remaining <= 0) grade(1, "Czas minął.");
   };
   timer = window.setInterval(tick, 250);
   tick();
@@ -249,7 +260,10 @@ function restoreQuestion(): void {
   get("#question-number", HTMLParagraphElement).textContent =
     `Szpilka ${questionCount}`;
   const answer = get("#answer", HTMLInputElement);
+  answer.dataset.questionId = structure.id;
   answer.value = session.draft;
+  get("#reasoning", HTMLTextAreaElement).value = session.reasoning;
+  get("#reasoning", HTMLTextAreaElement).disabled = revealed;
   answer.disabled = revealed;
   get("#check-answer", HTMLButtonElement).disabled = revealed;
   get("#reveal-answer", HTMLButtonElement).hidden = revealed;
@@ -426,6 +440,7 @@ async function loadAtlas(restore = false): Promise<void> {
       get("#layer-preset", HTMLSelectElement).value = "custom";
       get("#timed", HTMLInputElement).checked = saved.timed;
       get("#only-mistakes", HTMLInputElement).checked = saved.onlyMistakes;
+      get("#early-review", HTMLInputElement).checked = saved.earlyReview;
       document
         .querySelectorAll<HTMLInputElement>("[data-quiz-system]")
         .forEach((input) => {
@@ -589,14 +604,29 @@ async function randomQuestion(): Promise<void> {
   viewer.setQuiz(true);
   viewer.select(null);
   applyLayers();
+  const eligible = candidatePool().map((structure) => ({
+    id: `${sex}:${structure.id}`,
+    structure,
+  }));
+  const mistaken = new Set(latestMistakes(study.reviews));
+  const onlyMistakes = get("#only-mistakes", HTMLInputElement).checked;
+  const queue = reviewQueue(
+    onlyMistakes ? eligible.filter((item) => mistaken.has(item.id)) : eligible,
+    study.schedules,
+    Date.now(),
+    get("#early-review", HTMLInputElement).checked,
+  );
+  if (!queue.items.length && queue.nextDue !== null) {
+    notify(
+      `Teraz nie ma kart do powtórki. Najbliższa: ${new Date(queue.nextDue).toLocaleString(getLanguage() === "pl" ? "pl-PL" : "en-GB")}. Możesz włączyć ćwiczenie przed terminem.`,
+    );
+    return;
+  }
   const candidate = nextQuestion(
-    candidatePool().map((structure) => ({
-      id: `${sex}:${structure.id}`,
-      structure,
-    })),
+    queue.items,
     previous ? `${sex}:${previous}` : null,
     study.reviews,
-    get("#only-mistakes", HTMLInputElement).checked,
+    onlyMistakes,
   );
   const s = candidate?.structure;
   if (!s) {
@@ -619,7 +649,10 @@ async function randomQuestion(): Promise<void> {
   get("#question-number", HTMLParagraphElement).textContent =
     `Szpilka ${questionCount}`;
   const answer = get("#answer", HTMLInputElement);
+  answer.dataset.questionId = s.id;
   answer.value = "";
+  get("#reasoning", HTMLTextAreaElement).value = "";
+  get("#reasoning", HTMLTextAreaElement).disabled = false;
   answer.disabled = false;
   get("#check-answer", HTMLButtonElement).disabled = false;
   get("#reveal-answer", HTMLButtonElement).hidden = false;
@@ -638,63 +671,58 @@ function revealAnswer(): void {
   clearTimer();
   revealed = true;
   get("#answer", HTMLInputElement).disabled = true;
+  get("#reasoning", HTMLTextAreaElement).disabled = true;
   get("#check-answer", HTMLButtonElement).disabled = true;
   get("#reveal-answer", HTMLButtonElement).hidden = true;
   get("#answer-result", HTMLDivElement).innerHTML =
     `<div class="revealed-answer"><span>Wskazana struktura</span><strong>${escapeHtml(displayName(question.organ))}</strong><em lang="la">${escapeHtml(question.organ.ta2_latin)}</em><small lang="en">${escapeHtml(question.organ.name_en)}</small></div>`;
-  get("#self-grade", HTMLDivElement).hidden = graded;
+  const ratings = get("#self-grade", HTMLDivElement);
+  ratings.hidden = graded;
+  ratings.innerHTML = ratingButtons(
+    study.schedules[`${sex}:${question.id}`],
+    getLanguage(),
+  );
+  ratings
+    .querySelectorAll<HTMLButtonElement>("[data-review-rating]")
+    .forEach(
+      (button) =>
+        (button.onclick = () =>
+          grade(ratingSchema.parse(Number(button.dataset.reviewRating)))),
+    );
   persist();
 }
-function grade(correct: boolean, message = ""): void {
+function grade(rating: StudyRating, message = ""): void {
   if (!question || graded) return;
-  graded = true;
-  let review: Review;
+  persist();
+  const id = `${sex}:${question.id}`;
   try {
-    review = recordReview(
+    recordRatedReview(
       study,
-      `${sex}:${question.id}`,
-      correct,
+      id,
+      rating,
       activeSession(study)?.id ?? "unassigned",
+      get("#reasoning", HTMLTextAreaElement).value,
     );
   } catch (error) {
     console.error(error);
-    review = study.reviews.at(-1) ?? {
-      id: `${sex}:${question.id}`,
-      correct,
-      at: Date.now(),
-    };
     notify(
       "Nie udało się zapisać postępów. Wyeksportuj je przed zamknięciem strony.",
     );
+    revealAnswer();
+    return;
   }
+  graded = true;
   revealAnswer();
   persist();
-  const result = get("#answer-result", HTMLDivElement);
+  const card = study.schedules[id];
   const status = document.createElement("p");
-  status.className = correct ? "grade-correct" : "grade-wrong";
+  status.className = rating === 1 ? "grade-wrong" : "grade-correct";
   status.textContent =
     message ||
-    (correct ? "Dobra odpowiedź." : "Ta struktura wróci do powtórki.");
-  result.prepend(status);
-  // A rejected synonym can be corrected without recording a second attempt.
-  if (!correct) {
-    const correction = document.createElement("button");
-    correction.className = "text-button";
-    correction.textContent = "Uznaj mój synonim za poprawny";
-    correction.onclick = () => {
-      review.correct = true;
-      try {
-        saveStudy(study);
-      } catch {
-        notify("Nie udało się zapisać korekty.");
-      }
-      status.textContent = "Odpowiedź uznana ręcznie.";
-      status.className = "grade-correct";
-      correction.remove();
-      updateScore();
-    };
-    result.append(correction);
-  }
+    (getLanguage() === "pl"
+      ? `Ocena ${rating}/4 · kolejna powtórka za ${intervalLabel(card?.due ?? Date.now(), Date.now(), "pl")}.`
+      : `Rating ${rating}/4 · next review in ${intervalLabel(card?.due ?? Date.now(), Date.now(), "en")}.`);
+  get("#answer-result", HTMLDivElement).prepend(status);
   updateScore();
 }
 function updateScore(): void {
@@ -759,7 +787,7 @@ function renderProgress(): void {
   const correct = reviews.filter((r) => r.correct).length;
   const wrong = latestMistakes(reviews);
   const root = get("#progress-view", HTMLElement);
-  root.innerHTML = `<div class="progress-header"><div><h1>Moja nauka</h1><p>Twoje postępy i sesje, zapisane w localStorage tej przeglądarki.</p></div><div class="button-row"><button id="export-study">Eksportuj postępy</button><label class="button" for="import-study">Importuj postępy</label><input id="import-study" type="file" accept="application/json" hidden></div></div><div class="progress-strip"><div><span>Wszystkie odpowiedzi</span><strong>${reviews.length}</strong></div><div><span>Poprawne odpowiedzi</span><strong>${correct}<small> / ${reviews.length}</small></strong></div><div><span>Struktury do powtórki</span><strong>${wrong.length}</strong></div><div><span>Zapisane sesje</span><strong>${study.sessions.length}</strong></div></div><section class="sessions-section"><h2>Historia sesji</h2><div id="sessions-list"></div></section><div class="progress-content"><section><h2>Do powtórki</h2><p class="muted">Ostatnia ocena każdej struktury decyduje, czy wróci na tę listę.</p><div id="mistakes-list"></div></section><section><h2>Ostatnie odpowiedzi</h2><div id="history-list"></div></section></div><p class="fineprint">Eksport JSON zawiera historię ocen, sesje oraz ustawienia. Import łączy postępy bez usuwania istniejących danych.</p>`;
+  root.innerHTML = `<div class="progress-header"><div><h1>Moja nauka</h1><p>Twoje postępy i sesje, zapisane w localStorage tej przeglądarki.</p></div><div class="button-row"><button id="export-study">Eksportuj postępy</button><label class="button" for="import-study">Importuj postępy</label><input id="import-study" type="file" accept="application/json" hidden></div></div><div class="progress-strip"><div><span>Wszystkie odpowiedzi</span><strong>${reviews.length}</strong></div><div><span>Poprawne odpowiedzi</span><strong>${correct}<small> / ${reviews.length}</small></strong></div><div><span>Struktury do powtórki</span><strong>${wrong.length}</strong></div><div><span>Zapisane sesje</span><strong>${study.sessions.length}</strong></div></div><section class="sessions-section"><h2>Powtórki FSRS</h2><p><span>Do powtórki teraz</span>: <strong>${Object.values(study.schedules).filter((card) => card.due <= Date.now()).length}</strong></p><p class="fineprint">Nowa fiszka otrzyma termin dopiero po wybraniu oceny 1–4.</p><div id="schedule-list"></div></section><section class="sessions-section"><h2>Historia sesji</h2><div id="sessions-list"></div></section><div class="progress-content"><section><h2>Do powtórki</h2><p class="muted">Ostatnia ocena każdej struktury decyduje, czy wróci na tę listę.</p><div id="mistakes-list"></div></section><section><h2>Ostatnie odpowiedzi</h2><div id="history-list"></div></section></div><p class="fineprint">Eksport JSON zawiera historię ocen, sesje oraz ustawienia. Import łączy postępy bez usuwania istniejących danych.</p>`;
   const sessionsList = get("#sessions-list", HTMLDivElement);
   sessionsList.innerHTML = study.sessions.length
     ? study.sessions
@@ -792,6 +820,16 @@ function renderProgress(): void {
     ).find((o) => o.organ_id === organId);
     return organ ? displayName(organ) : photoNameForReview(id);
   };
+  get("#schedule-list", HTMLDivElement).innerHTML = Object.entries(
+    study.schedules,
+  )
+    .sort((a, b) => a[1].due - b[1].due)
+    .slice(0, 30)
+    .map(
+      ([id, card]) =>
+        `<div class="review-row"><span>${escapeHtml(nameFor(id))}</span><span>${new Date(card.due).toLocaleString(getLanguage() === "pl" ? "pl-PL" : "en-GB")}</span></div>`,
+    )
+    .join("");
   get("#mistakes-list", HTMLDivElement).innerHTML = wrong.length
     ? wrong
         .map(
@@ -806,7 +844,7 @@ function renderProgress(): void {
         .reverse()
         .map(
           (r) =>
-            `<div class="review-row"><span>${escapeHtml(nameFor(r.id))}<small>${new Date(r.at).toLocaleString(getLanguage() === "pl" ? "pl-PL" : "en-GB")}</small></span><span class="${r.correct ? "grade-correct" : "grade-wrong"}">${r.correct ? "Poprawnie" : "Do powtórki"}</span></div>`,
+            `<div class="review-row"><span>${escapeHtml(nameFor(r.id))}<small>${new Date(r.at).toLocaleString(getLanguage() === "pl" ? "pl-PL" : "en-GB")}</small>${r.reasoning ? `<details><summary>${getLanguage() === "pl" ? "Moje uzasadnienie" : "My reasoning"}</summary><p>${escapeHtml(r.reasoning)}</p></details>` : ""}</span><span class="${r.correct ? "grade-correct" : "grade-wrong"}">${r.rating ? `${r.rating}/4` : r.correct ? "Poprawnie" : "Do powtórki"}</span></div>`,
         )
         .join("")
     : '<p class="empty-progress">Historia pojawi się po pierwszej ocenionej odpowiedzi.</p>';
@@ -946,20 +984,33 @@ get("#random-pin", HTMLButtonElement).onclick = () => {
 };
 get("#answer-form", HTMLFormElement).onsubmit = (event) => {
   event.preventDefault();
-  if (question && !revealed)
-    grade(
-      answerMatches(
-        get("#answer", HTMLInputElement).value,
-        acceptedNames(question.organ),
-      ),
-    );
+  if (!question || revealed) return;
+  const result = answerFeedback(
+    get("#answer", HTMLInputElement).value,
+    acceptedNames(question.organ),
+  );
+  revealAnswer();
+  const note = document.createElement("p");
+  const lang = getLanguage();
+  note.textContent =
+    result === "exact"
+      ? lang === "pl"
+        ? "Nazwa jest zgodna. Oceń, jak dobrze ją pamiętasz."
+        : "Name matches. Rate your recall."
+      : result === "typo"
+        ? lang === "pl"
+          ? "Możliwa literówka. Porównaj odpowiedź i wybierz ocenę; nie zapisano błędu."
+          : "Possible typo. Compare and rate; no failure has been recorded."
+        : lang === "pl"
+          ? "Porównaj odpowiedź i wybierz ocenę od 1 do 4."
+          : "Compare your answer and choose a rating from 1 to 4.";
+  get("#answer-result", HTMLDivElement).prepend(note);
 };
 get("#reveal-answer", HTMLButtonElement).onclick = revealAnswer;
-get("#grade-wrong", HTMLButtonElement).onclick = () => grade(false);
-get("#grade-correct", HTMLButtonElement).onclick = () => grade(true);
+get("#reasoning", HTMLTextAreaElement).addEventListener("input", persist);
 document
   .querySelectorAll<HTMLInputElement>(
-    "[data-quiz-system],#only-mistakes,#timed",
+    "[data-quiz-system],#only-mistakes,#timed,#early-review",
   )
   .forEach(
     (input) =>
@@ -986,6 +1037,7 @@ window.addEventListener("keydown", (event) => {
   if (
     event.target instanceof HTMLInputElement ||
     event.target instanceof HTMLSelectElement ||
+    event.target instanceof HTMLTextAreaElement ||
     help.open ||
     currentView !== "atlas"
   )

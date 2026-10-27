@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { bookCategories } from "./book-category";
+import type { BookCategory } from "./book-category";
 import { mcminnId } from "./photo-data";
 import bookUrl from "./data/mcminn-book.json?url";
 
@@ -17,6 +19,7 @@ export type PageBox = z.infer<typeof boxSchema>;
 const labelSchema = z.object({
   id: z.string(),
   number: z.number().int().positive(),
+  category: z.enum(bookCategories).default("other"),
   answer: boxSchema,
   legend: boxSchema,
 });
@@ -47,6 +50,7 @@ export interface BookQuestion {
   atlasId: string;
   page: number;
   number: number;
+  category: BookCategory;
   answer: PageBox;
   legend: PageBox;
 }

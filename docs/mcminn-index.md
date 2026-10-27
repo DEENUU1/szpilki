@@ -10,7 +10,7 @@ The index contains **6,784 numbered-caption questions on 317 PDF pages**. These 
 
 Choose **Whole McMinn · printed numbers**, select an inclusive PDF page range and draw a question. The app retains numbers on specimens, masks detected text and outlines the relevant legend block. The question asks for a printed number associated with that block. It does not invent a point on the photograph.
 
-Type an answer and reveal it. The app shows a magnified crop of the **original caption from the local PDF**, and restores the page, including its source commentary and neighbouring structures. Use **Enlarge source page** to read it at full size. Assess the answer manually. English UI does not translate the book's original Polish/Latin captions.
+Type an answer and reveal it. The app shows a magnified crop of the **original caption from the local PDF**, and restores the page, including its source commentary and neighbouring structures. The category filter is automatic and can leave ambiguous captions unclassified. Use **Enlarge source page** to read it at full size. Assess the answer manually. English UI does not translate the book's original Polish/Latin captions.
 
 Neither OCR text nor generated medical claims are used as an answer key. The existing 39 prepared pins retain automatic name matching, original bilingual explanations and verified model identifiers. Their content is separate from this source-caption mode. Detailed new explanations, structured syllabus classification and 3D links have **not** been authored for every book question.
 
@@ -36,6 +36,6 @@ npm test
 npm run build
 ```
 
-The OCR runner rejects a different scan before processing. OCR output contains private textbook text and belongs in ignored `.research/`. The public index contains only page numbers, printed numbers, IDs and normalized rectangles for captions, legends and text masks. It contains no textbook pixels or transcribed prose. The browser downloads this approximately 2.15 MB metadata asset only after opening the matching PDF.
+The OCR runner rejects a different scan before processing. OCR output contains private textbook text and belongs in ignored `.research/`. The public index contains only page numbers, printed numbers, IDs, inferred category codes and normalized rectangles for captions, legends and text masks. It contains no textbook pixels or transcribed prose. The browser downloads this approximately 2.15 MB metadata asset only after opening the matching PDF.
 
 The extractor requires nearby numbered-caption sequences with a parenthesized Latin name, bounds continuation lines by column and the next caption, and excludes ambiguous duplicate numbers within one legend group. These are layout heuristics, not anatomical verification. The source caption remains the authority.

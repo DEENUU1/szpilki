@@ -6,7 +6,7 @@ import {
   mergeStudy,
   parseStudy,
   readStudy,
-  recordReview,
+  recordRatedReview,
   saveStudy,
   startSession,
 } from "../src/storage";
@@ -40,10 +40,10 @@ describe("practice and resume", () => {
   it("keeps completed sessions and associates each answer with its actual session", () => {
     const study = emptyStudy();
     const first = startSession(study, study.preferences, 1000, "first");
-    recordReview(study, "male:femur_l", false, first.id);
+    recordRatedReview(study, "male:femur_l", 1, first.id);
     endSession(study, 2000);
     const second = startSession(study, study.preferences, 3000, "second");
-    recordReview(study, "male:femur_l", true, second.id);
+    recordRatedReview(study, "male:femur_l", 3, second.id);
     expect(study.sessions[0]?.endedAt).toBe(2000);
     expect(study.reviews.map((r) => r.sessionId)).toEqual(["first", "second"]);
     expect(latestMistakes(study.reviews)).toEqual([]);
@@ -66,7 +66,7 @@ describe("practice and resume", () => {
   it("merges imports without duplicating attempts or replacing the active local session", () => {
     const local = emptyStudy();
     startSession(local, local.preferences, 1, "local");
-    recordReview(local, "male:ulna_l", true, "local");
+    recordRatedReview(local, "male:ulna_l", 3, "local");
     const imported = parseStudy(JSON.parse(JSON.stringify(local)));
     endSession(imported, 2);
     imported.sessions[0] && (imported.sessions[0].updatedAt = 3);
@@ -86,7 +86,7 @@ describe("practice and resume", () => {
       version: 1,
       reviews: [{ id: "femur_l", at: 1, correct: false }],
     });
-    expect(migrated.version).toBe(2);
+    expect(migrated.version).toBe(3);
     expect(migrated.reviews).toHaveLength(1);
   });
 });
