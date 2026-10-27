@@ -12,7 +12,7 @@ Choose **Whole McMinn · printed numbers**, select an inclusive PDF page range a
 
 Type an answer and reveal it. The app shows a magnified crop of the **original caption from the local PDF**, and restores the page, including its source commentary and neighbouring structures. The category filter is automatic and can leave ambiguous captions unclassified. Use **Enlarge source page** to read it at full size. Assess the answer manually. English UI does not translate the book's original Polish/Latin captions.
 
-Neither OCR text nor generated medical claims are used as an answer key. The separate 119 prepared pins provide automatic name matching, original bilingual explanations and verified model identifiers. Their content is separate from this source-caption mode. Detailed new explanations, structured syllabus classification and 3D links have **not** been authored for every book question.
+Neither OCR text nor generated medical claims are used as an answer key. The separate 174 prepared pins provide automatic name matching, original bilingual explanations and verified model identifiers. Their content is separate from this source-caption mode. Detailed new explanations, structured syllabus classification and 3D links have **not** been authored for every book question.
 
 Automatically located captions and masks have **not** all been reviewed individually. A malformed crop, repeated number in separate figures or missed text can make a question unsuitable. Skip it without grading, or use **Wrong caption / exclude question**. Exclusions are saved locally, included in study JSON and can be restored. They are not sent anywhere.
 

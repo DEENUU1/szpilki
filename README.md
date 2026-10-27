@@ -24,7 +24,7 @@ Polish is the default. Switch to English at any time; your explicit choice is re
 
 This mode uses automatically located captions, which have not all been individually reviewed. It does not automatically grade OCR text or invent medical explanations. Exclude unsuitable questions locally and restore them later. Source captions remain in Polish/Latin even with English UI. See [coverage, limitations and the offline extraction workflow](docs/mcminn-index.md).
 
-The included McMinn deck contains **119 manually positioned pins for 104 distinct anatomical names**, on 15 PDF pages: 36 bony landmarks, 41 muscle/tendon questions, 30 nerve questions and 12 joint/ligament questions. The 80 new questions add axillary and posterior shoulder dissections, the elbow and proximal forearm, the gluteal region, anterior thigh, popliteal fossa, anterior leg and knee ligaments. Each has original bilingual recognition and relationship notes, a source figure/label reference and a validated 3D link. Selected material from classes 2–8 is covered; the axial skeleton and the rest of the syllabus are not yet fully authored. [Coverage and content checks](docs/curated-pins.md).
+The included McMinn deck contains **174 manually positioned pins for 153 distinct anatomical names**, on 21 PDF pages: 36 bony landmarks, 80 muscle/tendon/fascial questions, 39 nerve questions and 19 joint/ligament questions. The expanded questions cover axillary and posterior shoulder dissections, the elbow and proximal forearm, the gluteal region, anterior thigh, popliteal fossa, anterior leg, knee ligaments, the palm/dorsal hand and wrist, and medial/lateral ankle and foot dissections. Each has original bilingual recognition and relationship notes, a source figure/label reference and a validated 3D link. Selected material from classes 2–8 is covered; the axial skeleton and the rest of the syllabus are not yet fully authored. [Coverage and content checks](docs/curated-pins.md).
 
 The deck is matched to an exact scan by SHA-256. Other editions, including a different McMinn scan, do not silently reuse its coordinates. You can add your own labelled points and bilingual explanations to other PDFs, including Yokochi. Those annotations join your practice pool and JSON export. Original textbook pages are **not distributed in this repository**.
 
@@ -71,7 +71,7 @@ Within the selected scope, due cards come before new cards; cards scheduled for 
 
 The optional reasoning field is a learner's note for comparing recognition with the available explanation. It is not automatically assessed by a medical model. A new card clears both fields; refreshing the same card restores its drafts.
 
-Whole-book questions now have automatically inferred bones, joints/ligaments, muscles, nerves and other/unclassified filters. These are source-caption heuristics, not expert-reviewed classifications. The authored deck contains 119 prepared pins; the larger mode still uses page-based numbered questions and original source captions, without newly authored anatomical explanations for every item.
+Whole-book questions now have automatically inferred bones, joints/ligaments, muscles, nerves and other/unclassified filters. These are source-caption heuristics, not expert-reviewed classifications. The authored deck contains 174 prepared pins; the larger mode still uses page-based numbered questions and original source captions, without newly authored anatomical explanations for every item.
 
 ## Development
 
