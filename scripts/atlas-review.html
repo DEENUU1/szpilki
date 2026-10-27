@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Szpilki · lokalna kontrola propozycji</title>
+    <style>
+      :root {
+        font: 15px system-ui;
+        color: #20292b;
+        background: #eef2f3;
+      }
+      body {
+        margin: 24px;
+      }
+      h1 {
+        font-size: 24px;
+        margin: 0 0 8px;
+      }
+      p {
+        line-height: 1.5;
+      }
+      button,
+      select,
+      input,
+      textarea {
+        font: inherit;
+        padding: 8px;
+        border: 1px solid #bac8cc;
+        border-radius: 5px;
+        background: white;
+        color: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      button.primary {
+        background: #176d80;
+        color: white;
+      }
+      label {
+        display: grid;
+        gap: 5px;
+      }
+      textarea {
+        min-height: 72px;
+      }
+      header,
+      main {
+        max-width: 1440px;
+        margin: auto;
+      }
+      .controls,
+      .buttons {
+        display: flex;
+        gap: 10px;
+        align-items: end;
+        flex-wrap: wrap;
+        margin: 15px 0;
+      }
+      .controls input {
+        width: 90px;
+      }
+      #candidate {
+        width: 100%;
+        max-width: 720px;
+      }
+      main {
+        display: grid;
+        grid-template-columns: minmax(400px, 1fr) minmax(360px, 480px);
+        gap: 24px;
+      }
+      section,
+      aside {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+      }
+      #figure {
+        position: relative;
+        max-width: 700px;
+        margin: auto;
+      }
+      #image {
+        width: 100%;
+        display: block;
+      }
+      #overlay {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+      aside label {
+        margin: 10px 0;
+      }
+      .pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .checks label {
+        display: flex;
+        align-items: start;
+        gap: 9px;
+      }
+      .checks input {
+        margin-top: 4px;
+      }
+      #source,
+      #provenance {
+        font-size: 13px;
+        background: #eef4f5;
+        padding: 12px;
+        white-space: pre-wrap;
+      }
+      #message {
+        color: #914019;
+        min-height: 24px;
+      }
+      #counts {
+        font-weight: 600;
+      }
+      .hint {
+        font-size: 13px;
+        color: #526267;
+      }
+      #crop-fields {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+      }
+      #crop-fields input {
+        width: 100%;
+        box-sizing: border-box;
+      }
+      svg rect,
+      svg circle {
+        vector-effect: non-scaling-stroke;
+      }
+      #error {
+        color: #932d25;
+      }
+      @media (max-width: 850px) {
+        body {
+          margin: 12px;
+        }
+        main {
+          grid-template-columns: 1fr;
+        }
+        .pair {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Kontrola propozycji szpilek · narzędzie lokalne</h1>
+      <p>
+        Niezweryfikowane propozycje. Niebieska ramka oznacza
+        <b>numer OCR, nie koniec szpilki</b>. Pomarańczowa ramka to przybliżony
+        kadr. Kliknij rzeczywistą strukturę lub koniec linii. Sprawdź podpis,
+        rycinę, stronę ciała oraz treść. Eksport nie zmienia aplikacji ani jej
+        postępów.
+      </p>
+      <p id="counts"></p>
+      <div class="controls">
+        <label
+          >Strona PDF<input id="page" type="number" min="1" max="362" /></label
+        ><label
+          >Propozycje<select id="filter">
+            <option value="all">Wszystkie</option>
+            <option value="colour-photo-support">
+              Wsparcie koloru fotografii
+            </option>
+            <option value="unresolved-image">Obraz niejednoznaczny</option>
+            <option value="catalog">Z wpisem w katalogu</option>
+            <option value="one-caption">Jeden podpis</option>
+            <option value="ambiguous-caption">Kilka podpisów</option>
+            <option value="missing-caption">Brak podpisu</option>
+          </select></label
+        ><button id="next-page">Następna strona</button
+        ><button id="save">Pobierz stan kontroli</button
+        ><label
+          >Wznów kontrolę<input
+            id="resume"
+            type="file"
+            accept="application/json" /></label
+        ><button id="export">Pobierz zatwierdzone szpilki</button>
+      </div>
+      <label>Numer / podpis<select id="candidate"></select></label>
+      <p id="error" role="alert"></p>
+    </header>
+    <main>
+      <section>
+        <div class="buttons">
+          <button id="tip-mode" class="primary">Kliknij koniec szpilki</button
+          ><button id="crop-mode">Ustaw kadr: dwa narożniki</button>
+        </div>
+        <div id="figure">
+          <img id="image" alt="Lokalna strona atlasu" /><svg
+            id="overlay"
+            viewBox="0 0 1 1"
+            preserveAspectRatio="none"
+          ></svg>
+        </div>
+        <p class="hint">
+          Kadr musi obejmować preparat i wykluczać podpisy odpowiedzi. Nie
+          używaj numeru jako punktu na strukturze. Schematy, MR oraz błędnie
+          połączone legendy odrzuć.
+        </p>
+      </section>
+      <aside>
+        <h2>Podpisy źródłowe</h2>
+        <div id="source"></div>
+        <label
+          >Wpis katalogu<select id="catalog">
+            <option value="">Bez dopasowania</option>
+          </select></label
+        >
+        <p id="provenance"></p>
+        <p class="hint">
+          Notatka z innego zdjęcia jest tylko szkicem: może zawierać uwagi o
+          tamtym preparacie. Wskazówki rozpoznania trzeba napisać dla bieżącego
+          widoku.
+        </p>
+        <div class="pair">
+          <label>Nazwa PL<input id="pl" /></label
+          ><label>Nazwa EN<input id="en" /></label>
+        </div>
+        <label>Nazwa łacińska<input id="latin" /></label>
+        <div class="pair">
+          <label
+            >Układ<select id="system">
+              <option value="">Wybierz</option>
+              <option>skeletal</option>
+              <option>muscular</option>
+              <option>articular</option>
+              <option>nervous</option>
+              <option>cardiovascular</option>
+              <option>respiratory</option>
+              <option>digestive</option>
+              <option>renal</option>
+              <option>reproductive</option>
+              <option>lymphatic</option>
+              <option>endocrine</option>
+              <option>regional</option>
+              <option>integumentary</option>
+            </select></label
+          ><label
+            >Okolica<select id="region">
+              <option value="">Wybierz</option>
+              <option>upper</option>
+              <option>lower</option>
+              <option>trunk</option>
+              <option>head</option>
+              <option>all</option>
+              <option>exam</option>
+            </select></label
+          ><label
+            >Ćwiczenie<input
+              id="exercise"
+              type="number"
+              min="1"
+              max="8" /></label
+          ><label
+            >Strona ciała<select id="side">
+              <option value="none">Nieparzysta / bez modelu</option>
+              <option value="l">Lewa</option>
+              <option value="r">Prawa</option>
+            </select></label
+          >
+        </div>
+        <label
+          ><span
+            ><input id="use-model" type="checkbox" /> Zachowaj model 3D z
+            wybranego wpisu</span
+          ></label
+        ><label>Jak rozpoznać · PL<textarea id="recognize-pl"></textarea></label
+        ><label
+          >How to recognise · EN<textarea id="recognize-en"></textarea></label
+        ><label
+          >Powiązania i teoria · PL<textarea id="theory-pl"></textarea></label
+        ><label
+          >Connections and theory · EN<textarea id="theory-en"></textarea>
+        </label>
+        <div id="crop-fields">
+          <label>x<input id="crop-x" type="number" step="0.0001" /></label
+          ><label>y<input id="crop-y" type="number" step="0.0001" /></label
+          ><label>w<input id="crop-w" type="number" step="0.0001" /></label
+          ><label>h<input id="crop-h" type="number" step="0.0001" /></label>
+        </div>
+        <div class="checks">
+          <label
+            ><input id="geometry" type="checkbox" /> Sprawdzono punkt i kadr na
+            fotografii</label
+          ><label
+            ><input id="caption" type="checkbox" /> Sprawdzono nazwę i właściwą
+            legendę</label
+          ><label
+            ><input id="content" type="checkbox" /> Sprawdzono PL/EN, teorię i
+            powiązanie 3D</label
+          >
+        </div>
+        <div class="buttons">
+          <button id="approve" class="primary">Zatwierdź</button
+          ><button id="reject">Odrzuć</button
+          ><button id="next">Następna propozycja</button>
+        </div>
+        <p id="message" role="status"></p>
+      </aside>
+    </main>
+    <script type="module" src="./review.js"></script>
+  </body>
+</html>
