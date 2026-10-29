@@ -43,7 +43,7 @@ describe("atlas integrity", () => {
   it("has bilingual source-backed photo pins on the specimen, with real model links", () => {
     const models = new Map(readManifest().organs.map((o) => [o.organ_id, o]));
     const ids = new Set(models.keys());
-    expect(starterPins).toHaveLength(119);
+    expect(starterPins).toHaveLength(174);
     expect(new Set(starterPins.map((p) => p.id)).size).toBe(starterPins.length);
     for (const value of starterPins) {
       const pin = photoPinSchema.parse(value);
@@ -51,8 +51,10 @@ describe("atlas integrity", () => {
       expect(pin.x).toBeLessThanOrEqual(pin.crop.x + pin.crop.w);
       expect(pin.y).toBeGreaterThanOrEqual(pin.crop.y);
       expect(pin.y).toBeLessThanOrEqual(pin.crop.y + pin.crop.h);
-      expect(pin.recognize.en.length).toBeGreaterThan(20);
-      expect(pin.theory.pl.length).toBeGreaterThan(20);
+      for (const language of ["en", "pl"] as const) {
+        expect(pin.recognize[language].length, pin.id).toBeGreaterThan(20);
+        expect(pin.theory[language].length, pin.id).toBeGreaterThan(20);
+      }
       expect(pin.source).toContain("McMinn");
       expect(pin.crop.x + pin.crop.w).toBeLessThanOrEqual(1);
       expect(pin.crop.y + pin.crop.h).toBeLessThanOrEqual(1);
@@ -75,7 +77,7 @@ describe("atlas integrity", () => {
     }
   });
   it("covers authored muscles, nerves and joints without replacing existing review IDs", () => {
-    expect(new Set(starterPins.map((p) => p.latin)).size).toBe(104);
+    expect(new Set(starterPins.map((p) => p.latin)).size).toBe(153);
     for (const exercise of [2, 3, 4, 5, 6, 7, 8]) {
       expect(
         starterPins.some((p) => p.exercise === exercise),
@@ -90,9 +92,9 @@ describe("atlas integrity", () => {
     );
     expect(counts).toEqual({
       skeletal: 36,
-      muscular: 41,
-      nervous: 30,
-      articular: 12,
+      muscular: 80,
+      nervous: 39,
+      articular: 19,
     });
     // Preserve keys used by saved schedules before this expansion.
     const originalPages = [
@@ -108,7 +110,9 @@ describe("atlas integrity", () => {
     );
     for (const pin of starterPins.slice(39)) {
       expect(pin.source).toContain(`PDF ${pin.page}`);
-      const side = [156, 159, 333, 338].includes(pin.page) ? "_l" : "_r";
+      const side = [156, 159, 165, 171, 333, 338, 350].includes(pin.page)
+        ? "_l"
+        : "_r";
       expect(pin.modelId?.endsWith(side), pin.id).toBe(true);
     }
     const highDivision = starterPins.find((p) => p.id === "mcminn-318-C-14");
@@ -117,6 +121,24 @@ describe("atlas integrity", () => {
     expect(
       starterPins.find((p) => p.id === "mcminn-333-C-11")?.source,
     ).toContain("legend: PDF 334");
+  });
+  it("identifies tendon and branch questions explicitly when the model is a parent or group", () => {
+    const distal = starterPins.filter((p) =>
+      [165, 169, 171, 346, 347, 350].includes(p.page),
+    );
+    expect(distal).toHaveLength(55);
+    const recurrent = distal.find((p) => p.id === "mcminn-165-A-4");
+    expect(recurrent?.modelId).toBe("median_nerve_l");
+    expect(recurrent?.theory.en).toContain("parent median nerve");
+    const lumbrical = distal.find((p) => p.id === "mcminn-165-A-8");
+    expect(lumbrical?.modelId).toBe("lumbrical_muscles_of_hand_l");
+    expect(lumbrical?.theory.en).toContain("groups");
+    const thumbTendon = distal.find((p) => p.id === "mcminn-171-A-8");
+    expect(thumbTendon?.en).toContain("tendon");
+    expect(thumbTendon?.theory.en).toContain("parent muscle");
+    expect(distal.find((p) => p.id === "mcminn-350-D-23")?.modelId).toBe(
+      "anterior_talofibular_ligament_l",
+    );
   });
   it("does not distribute the private textbooks in public assets", () => {
     expect(
